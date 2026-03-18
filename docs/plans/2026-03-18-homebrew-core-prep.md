@@ -10,6 +10,15 @@
 
 ---
 
+## Current Draft Status
+
+- `v0.1.0` has been tagged and released on GitHub.
+- The current formula draft should live at `Formula/codex-agents.rb`.
+- The draft should install the bundled repository layout into `libexec` and expose `codex-agents` via `bin.write_exec_script`.
+- Current Homebrew releases reject non-tap local formula installs, so local validation should use a temporary tap roundtrip instead of `brew install ./Formula/...`.
+- The first local validation path should be:
+  - `bash tests/homebrew_formula_temp_tap_roundtrip.sh`
+
 ## Chunk 1: Release Foundations
 
 ### Task 1: Lock the legal and versioning baseline
