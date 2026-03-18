@@ -62,6 +62,11 @@ That makes role-driven delegation harder to adopt consistently, harder to share,
   - `complex`
 - automatic downstream skill selection inside `orchestrator-routing`
 - automatic role-chain pruning based on task shape instead of defaulting to a full role sequence
+- explicit routing output from `orchestrator-routing`:
+  - `complexity`
+  - `role-chain`
+  - `next-step`
+  - `reason`
 - automatic continuous orchestration behavior inside `orchestrator-routing`, where it can move through a pruned role chain until it has a final result
 - explicit stop, downgrade, upgrade, and reroute rules when the initial chain proves wrong
 
@@ -96,6 +101,7 @@ codex-agents/
 - `bin/codex-agents` creates or updates a clearly marked managed block in `~/.codex/AGENTS.md`
 - `orchestrator-routing` is the default entrypoint for complex or ambiguous work
 - `orchestrator-routing` first classifies task complexity, then prunes the smallest necessary role chain, then chooses downstream skills and roles toward a final result
+- `orchestrator-routing` makes that routing visible with a short output block before deeper guidance continues
 - `orchestrator.md` remains the baseline orchestration role definition that the routing skill aligns to and references
 - local user rules and project rules remain stronger than the bundled baselines
 
@@ -203,6 +209,11 @@ codex-agents/
 
 - act as the default entrypoint for installed role-driven workflows
 - classify task complexity as `simple`, `multi-step`, or `complex`
+- emit an explicit routing block with:
+  - `complexity`
+  - `role-chain`
+  - `next-step`
+  - `reason`
 - identify which uncertainty is most important to resolve first
 - route to the smallest useful specialist or specialist chain
 - choose the next downstream skill or role before implementation begins
