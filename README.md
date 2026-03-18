@@ -1,11 +1,11 @@
 # codex-agents
 
-Claude-style role baselines and a lightweight orchestrator installer for Codex.
+Claude-style Codex agents plus a default-entrypoint orchestrator that automatically prunes the smallest useful role chain for a task.
 
 ## What This Repo Provides
 
 - A set of Codex agent baseline files in [`agents/`](/Users/ryan/Projects/Ai/other/codex-agents/agents)
-- A top-level [`orchestrator.md`](/Users/ryan/Projects/Ai/other/codex-agents/agents/orchestrator.md) that routes work to the most relevant specialist
+- A top-level [`orchestrator.md`](/Users/ryan/Projects/Ai/other/codex-agents/agents/orchestrator.md) that acts as the default entrypoint for non-trivial work
 - A simple installer CLI in [`bin/codex-agents`](/Users/ryan/Projects/Ai/other/codex-agents/bin/codex-agents)
 - A Claude-style `~/.codex/agents/` installation model that keeps the first version easy to understand and easy to update
 
@@ -65,32 +65,30 @@ bin/codex-agents list
 
 ## How To Use
 
-- Treat these agent files as broad baseline role guidance for Codex subagent-style workflows.
-- Use the orchestrator to decide which specialist best fits the current phase of work.
-- Keep local global rules and repository-local rules stronger than these generic baselines.
-- After specialist output returns, the main line should still integrate the result, verify it, and decide whether the work actually meets the acceptance bar.
+- Treat these agent files as a lightweight role system for Codex.
+- Start non-trivial work from `orchestrator`.
+- Let `orchestrator` classify the task as `simple`, `multi-step`, or `complex`.
+- Let `orchestrator` prune the smallest useful role chain instead of defaulting to the full role set.
+- Allow `orchestrator` to stop early, downgrade, upgrade, or reroute when the initial chain is wrong.
+- Keep stronger local global rules and repository-local rules above these generic baselines.
 
 ## Practical Usage Pattern
 
-Use the installed role files as a lightweight multi-agent system:
+Use the installed role files as a lightweight default-entrypoint orchestration system:
 
-1. Start with `orchestrator` to decide the current phase.
-2. Route to the smallest useful specialist.
-3. Bring the result back to the main line.
-4. Review and verify before calling the work complete.
+1. Present the task normally.
+2. Let `orchestrator` classify it as `simple`, `multi-step`, or `complex`.
+3. Let `orchestrator` choose the smallest useful role chain.
+4. Let that chain continue only while each next role is still justified.
+5. End early when the task is already resolved, or reroute when the current path breaks.
 
 Typical routes:
 
-- ambiguous request -> `product-manager`
-- flow/interaction problem -> `ux-architect`
-- visual/UI clarity problem -> `ui-designer`
-- frontend implementation -> `frontend-developer`
-- backend/API/data problem -> `backend-architect`
-- architecture trade-off -> `software-architect`
-- official docs / SDK / MCP / platform question -> `docs-researcher`
-- post-implementation risk review -> `code-reviewer`
-- pre-delivery reality check -> `reality-checker`
-- docs / handoff / release notes -> `technical-writer`
+- ambiguous request -> `product-manager -> ...`
+- flow/interaction problem -> `ux-architect -> frontend-developer -> reality-checker`
+- architecture-heavy backend change -> `software-architect -> backend-architect -> code-reviewer -> reality-checker`
+- official docs / SDK / MCP / platform question -> `docs-researcher`, then stop early if that already resolves the task
+- delivery-bound implementation -> implementer role -> `code-reviewer -> reality-checker`
 
 ## Release Model
 
@@ -112,4 +110,6 @@ bin/codex-agents install
 
 - This repo intentionally installs directly into `~/.codex/agents/`, similar to the way Claude-style agent directories are commonly organized.
 - The first version does not modify user `AGENTS.md` files or `config.toml`.
-- The first version does not try to auto-route every task. Instead, it provides a clean role set plus an orchestrator baseline.
+- The main feature is the default-entrypoint behavior of `orchestrator`, not just the presence of many role files.
+- The first version aims for automatic chain pruning and automatic continuation through the smallest useful role sequence.
+- The first version still does not promise perfect routing, hidden Codex hooks, or a flawless autonomous execution engine.
