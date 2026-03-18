@@ -18,6 +18,7 @@ usage() {
 Usage:
   codex-agents install   Copy bundled agents and skills into ~/.codex
   codex-agents update    Overwrite installed agents and skills from the current repo
+  codex-agents status    Show a lightweight installed-state summary
   codex-agents doctor    Check installed agents, skills, and managed entrypoint state
   codex-agents uninstall Remove bundled agents, orchestrator-routing skill, and the managed entrypoint block
   codex-agents list      List bundled agent files and skills
@@ -152,6 +153,42 @@ doctor() {
   return "${failures}"
 }
 
+status_summary() {
+  local agents_state="missing"
+  local skill_state="missing"
+  local managed_state="missing"
+  local agent_count=0
+  local skill_count=0
+
+  if [[ -d "${TARGET_AGENTS_DIR}" ]]; then
+    agents_state="present"
+    agent_count="$(find "${TARGET_AGENTS_DIR}" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
+  fi
+
+  if [[ -f "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md" ]]; then
+    skill_state="present"
+  fi
+
+  if [[ -d "${TARGET_SKILLS_DIR}" ]]; then
+    skill_count="$(find "${TARGET_SKILLS_DIR}" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
+  fi
+
+  if [[ -f "${TARGET_AGENTS_RULES_FILE}" ]]; then
+    local contents
+    contents="$(cat "${TARGET_AGENTS_RULES_FILE}")"
+    if [[ "${contents}" == *"${ENTRYPOINT_BEGIN}"* && "${contents}" == *"orchestrator-routing"* ]]; then
+      managed_state="present"
+    fi
+  fi
+
+  echo "codex-agents status"
+  echo "agents_dir=${agents_state}"
+  echo "agents_count=${agent_count}"
+  echo "orchestrator_routing_skill=${skill_state}"
+  echo "managed_entrypoint=${managed_state}"
+  echo "skills_count=${skill_count}"
+}
+
 managed_entrypoint_block() {
   cat <<EOF
 ${ENTRYPOINT_BEGIN}
@@ -273,6 +310,9 @@ case "${1:-}" in
     ;;
   doctor)
     doctor
+    ;;
+  status)
+    status_summary
     ;;
   uninstall)
     uninstall_bundle
