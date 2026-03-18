@@ -6,6 +6,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SOURCE_AGENTS_DIR="${REPO_ROOT}/agents"
 TARGET_AGENTS_DIR="${HOME}/.codex/agents"
+TARGET_CODEX_DIR="${HOME}/.codex"
+TARGET_AGENTS_RULES_FILE="${TARGET_CODEX_DIR}/AGENTS.md"
+ENTRYPOINT_BEGIN="<!-- BEGIN CODEX-AGENTS MANAGED ENTRYPOINT -->"
+ENTRYPOINT_END="<!-- END CODEX-AGENTS MANAGED ENTRYPOINT -->"
 
 usage() {
   cat <<'EOF'
@@ -22,9 +26,46 @@ list_agents() {
     | sort
 }
 
+managed_entrypoint_block() {
+  cat <<EOF
+${ENTRYPOINT_BEGIN}
+## codex-agents Managed Entrypoint
+
+- For non-trivial work that clearly spans multiple phases or roles, start from \`orchestrator\`.
+- Let \`orchestrator\` classify the task as \`simple\`, \`multi-step\`, or \`complex\`.
+- Let \`orchestrator\` prune the smallest useful role chain instead of defaulting to the full role set.
+- Allow \`orchestrator\` to stop early, downgrade, upgrade, or reroute when the original chain is no longer justified.
+- Stronger local project rules and repository-specific rules still override this managed baseline.
+${ENTRYPOINT_END}
+EOF
+}
+
+upsert_managed_entrypoint() {
+  mkdir -p "${TARGET_CODEX_DIR}"
+
+  local tmp_file
+  tmp_file="$(mktemp)"
+
+  if [[ -f "${TARGET_AGENTS_RULES_FILE}" ]]; then
+    awk -v begin="${ENTRYPOINT_BEGIN}" -v end="${ENTRYPOINT_END}" '
+      $0 == begin { skip = 1; next }
+      $0 == end { skip = 0; next }
+      !skip { print }
+    ' "${TARGET_AGENTS_RULES_FILE}" > "${tmp_file}"
+
+    if [[ -s "${tmp_file}" ]]; then
+      printf "\n\n" >> "${tmp_file}"
+    fi
+  fi
+
+  managed_entrypoint_block >> "${tmp_file}"
+  mv "${tmp_file}" "${TARGET_AGENTS_RULES_FILE}"
+}
+
 install_agents() {
   mkdir -p "${TARGET_AGENTS_DIR}"
   cp "${SOURCE_AGENTS_DIR}"/*.md "${TARGET_AGENTS_DIR}/"
+  upsert_managed_entrypoint
   echo "Installed agents to ${TARGET_AGENTS_DIR}:"
   list_agents
 }
