@@ -5,7 +5,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SOURCE_AGENTS_DIR="${REPO_ROOT}/agents"
+SOURCE_SKILLS_DIR="${REPO_ROOT}/skills"
 TARGET_AGENTS_DIR="${HOME}/.codex/agents"
+TARGET_SKILLS_DIR="${HOME}/.codex/skills"
 TARGET_CODEX_DIR="${HOME}/.codex"
 TARGET_AGENTS_RULES_FILE="${TARGET_CODEX_DIR}/AGENTS.md"
 ENTRYPOINT_BEGIN="<!-- BEGIN CODEX-AGENTS MANAGED ENTRYPOINT -->"
@@ -14,9 +16,9 @@ ENTRYPOINT_END="<!-- END CODEX-AGENTS MANAGED ENTRYPOINT -->"
 usage() {
   cat <<'EOF'
 Usage:
-  codex-agents install   Copy bundled agent files into ~/.codex/agents
-  codex-agents update    Overwrite installed agent files from the current repo
-  codex-agents list      List bundled agent files
+  codex-agents install   Copy bundled agents and skills into ~/.codex
+  codex-agents update    Overwrite installed agents and skills from the current repo
+  codex-agents list      List bundled agent files and skills
 EOF
 }
 
@@ -26,15 +28,30 @@ list_agents() {
     | sort
 }
 
+list_skills() {
+  find "${SOURCE_SKILLS_DIR}" -mindepth 1 -maxdepth 1 -type d -print \
+    | xargs -I{} basename "{}" \
+    | sort
+}
+
+list_bundle() {
+  echo "Bundled agents:"
+  list_agents
+  echo
+  echo "Bundled skills:"
+  list_skills
+}
+
 managed_entrypoint_block() {
   cat <<EOF
 ${ENTRYPOINT_BEGIN}
 ## codex-agents Managed Entrypoint
 
-- For non-trivial work that clearly spans multiple phases or roles, start from \`orchestrator\`.
-- Let \`orchestrator\` classify the task as \`simple\`, \`multi-step\`, or \`complex\`.
-- Let \`orchestrator\` prune the smallest useful role chain instead of defaulting to the full role set.
-- Allow \`orchestrator\` to stop early, downgrade, upgrade, or reroute when the original chain is no longer justified.
+- For non-trivial work that clearly spans multiple phases or roles, use the installed \`orchestrator-routing\` skill before choosing downstream skills or implementation.
+- Let \`orchestrator-routing\` classify the task as \`simple\`, \`multi-step\`, or \`complex\`.
+- Let \`orchestrator-routing\` prune the smallest useful role chain instead of defaulting to the full role set.
+- Let \`orchestrator-routing\` decide whether downstream work should enter skills such as \`brainstorming\`, \`writing-plans\`, or implementation-focused skills.
+- Keep \`orchestrator.md\` as the baseline role definition that the routing skill can align to and reference.
 - Stronger local project rules and repository-specific rules still override this managed baseline.
 ${ENTRYPOINT_END}
 EOF
@@ -62,12 +79,24 @@ upsert_managed_entrypoint() {
   mv "${tmp_file}" "${TARGET_AGENTS_RULES_FILE}"
 }
 
+install_skills() {
+  mkdir -p "${TARGET_SKILLS_DIR}"
+
+  local skill_dir
+  for skill_dir in "${SOURCE_SKILLS_DIR}"/*; do
+    [[ -d "${skill_dir}" ]] || continue
+    rm -rf "${TARGET_SKILLS_DIR}/$(basename "${skill_dir}")"
+    cp -R "${skill_dir}" "${TARGET_SKILLS_DIR}/"
+  done
+}
+
 install_agents() {
   mkdir -p "${TARGET_AGENTS_DIR}"
   cp "${SOURCE_AGENTS_DIR}"/*.md "${TARGET_AGENTS_DIR}/"
+  install_skills
   upsert_managed_entrypoint
-  echo "Installed agents to ${TARGET_AGENTS_DIR}:"
-  list_agents
+  echo "Installed bundle into ${TARGET_CODEX_DIR}:"
+  list_bundle
 }
 
 update_agents() {
@@ -82,7 +111,7 @@ case "${1:-}" in
     update_agents
     ;;
   list)
-    list_agents
+    list_bundle
     ;;
   *)
     usage
