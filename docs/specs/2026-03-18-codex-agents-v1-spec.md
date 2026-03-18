@@ -48,6 +48,7 @@ That makes role-driven delegation harder to adopt consistently, harder to share,
   - `install`
   - `update`
   - `doctor`
+  - `uninstall`
   - `list`
 - installation targets:
   - `~/.codex/agents/`
@@ -130,6 +131,13 @@ codex-agents/
   - `Next actions`
 - explain the common case where the skill is installed on disk but an already-open conversation still has a stale skill list
 
+### `uninstall`
+
+- remove bundled agent files previously installed by this repo
+- remove bundled skill directories previously installed by this repo
+- remove the managed `~/.codex/AGENTS.md` block
+- leave unrelated global skills and unrelated `AGENTS.md` content intact
+
 ## User Flows
 
 ### First-Time Install Flow
@@ -149,6 +157,14 @@ codex-agents/
 3. Tool overwrites installed role files and skills with the current repository versions.
 4. Tool replaces the managed entrypoint block with the current version.
 5. User continues with the updated role set, skill bundle, and managed routing behavior.
+
+### Uninstall Flow
+
+1. User runs `bin/codex-agents uninstall`.
+2. Tool removes the bundled agent files from `~/.codex/agents/`.
+3. Tool removes bundled skills from `~/.codex/skills/`.
+4. Tool removes the managed `AGENTS.md` entrypoint block.
+5. Tool keeps unrelated global files intact.
 
 ### Doctor Flow
 
@@ -262,8 +278,10 @@ The routing skill should choose whether those downstream skills run next. It sho
 - `install` copies all bundled role files into `~/.codex/agents/`.
 - `install` copies all bundled skill directories into `~/.codex/skills/`.
 - `install` creates or updates the managed `~/.codex/AGENTS.md` block.
+- `install` and `update` remind the user to open a new conversation so the refreshed skill list is visible.
 - `update` overwrites the installed files with current repository contents.
 - `doctor` reports installed state and common stale-session guidance.
+- `uninstall` removes only the bundle managed by this repo and leaves unrelated files intact.
 - `list` prints the bundled role and skill set.
 - README explains install, update, list, skill-first routing behavior, and scope boundaries.
 - The repository remains easy to clone and use without additional packaging or config mutation beyond the managed `AGENTS.md` block.

@@ -76,6 +76,8 @@ And these skills:
 bin/codex-agents update
 ```
 
+Both `install` and `update` now remind the user to open a new Codex conversation so the refreshed skill list is picked up.
+
 ## Doctor
 
 ```bash
@@ -88,6 +90,20 @@ Use `doctor` to check:
 - whether `orchestrator-routing` is installed in `~/.codex/skills/`
 - whether the managed `AGENTS.md` block is present and up to date
 - whether the most likely issue is simply that the current conversation needs a fresh skill index
+
+## Uninstall
+
+```bash
+bin/codex-agents uninstall
+```
+
+`uninstall` removes only the bundle managed by this repo:
+
+- bundled agent files from `~/.codex/agents/`
+- bundled skill directories from `~/.codex/skills/`
+- the managed entrypoint block in `~/.codex/AGENTS.md`
+
+It does **not** remove unrelated global skills or unrelated content from `AGENTS.md`.
 
 ## List Bundled Files
 
@@ -128,6 +144,7 @@ Typical routes:
 
 - `install` is for first-time setup into `~/.codex`
 - `update` overwrites installed agent files, skills, and the managed entrypoint block with the current repo version
+- `uninstall` removes only the bundle managed by this repository
 - `doctor` checks installed state and explains common “installed but not visible in current conversation” situations
 - `list` shows the bundled agents and skills before install or update
 

@@ -19,6 +19,7 @@ Usage:
   codex-agents install   Copy bundled agents and skills into ~/.codex
   codex-agents update    Overwrite installed agents and skills from the current repo
   codex-agents doctor    Check installed agents, skills, and managed entrypoint state
+  codex-agents uninstall Remove bundled agents, orchestrator-routing skill, and the managed entrypoint block
   codex-agents list      List bundled agent files and skills
 EOF
 }
@@ -188,6 +189,30 @@ upsert_managed_entrypoint() {
   mv "${tmp_file}" "${TARGET_AGENTS_RULES_FILE}"
 }
 
+remove_managed_entrypoint() {
+  [[ -f "${TARGET_AGENTS_RULES_FILE}" ]] || return 0
+
+  local tmp_file
+  tmp_file="$(mktemp)"
+
+  awk -v begin="${ENTRYPOINT_BEGIN}" -v end="${ENTRYPOINT_END}" '
+    $0 == begin { skip = 1; next }
+    $0 == end { skip = 0; next }
+    !skip { print }
+  ' "${TARGET_AGENTS_RULES_FILE}" > "${tmp_file}"
+
+  python3 - <<'PY' "${tmp_file}"
+from pathlib import Path
+import sys
+path = Path(sys.argv[1])
+text = path.read_text()
+text = text.rstrip() + "\n" if text.strip() else ""
+path.write_text(text)
+PY
+
+  mv "${tmp_file}" "${TARGET_AGENTS_RULES_FILE}"
+}
+
 install_skills() {
   mkdir -p "${TARGET_SKILLS_DIR}"
 
@@ -206,10 +231,37 @@ install_agents() {
   upsert_managed_entrypoint
   echo "Installed bundle into ${TARGET_CODEX_DIR}:"
   list_bundle
+  echo
+  echo "Next actions:"
+  echo "- Open a new Codex conversation so the updated skill list is picked up."
+  echo "- If a fresh conversation still cannot see orchestrator-routing, restart the Codex app."
 }
 
 update_agents() {
   install_agents
+}
+
+uninstall_bundle() {
+  local agent_file
+  for agent_file in "${SOURCE_AGENTS_DIR}"/*.md; do
+    [[ -f "${agent_file}" ]] || continue
+    rm -f "${TARGET_AGENTS_DIR}/$(basename "${agent_file}")"
+  done
+
+  if [[ -d "${TARGET_AGENTS_DIR}" ]] && [[ -z "$(find "${TARGET_AGENTS_DIR}" -maxdepth 1 -type f -name '*.md' -print -quit)" ]]; then
+    rmdir "${TARGET_AGENTS_DIR}" 2>/dev/null || true
+  fi
+
+  local skill_dir
+  for skill_dir in "${SOURCE_SKILLS_DIR}"/*; do
+    [[ -d "${skill_dir}" ]] || continue
+    rm -rf "${TARGET_SKILLS_DIR}/$(basename "${skill_dir}")"
+  done
+
+  remove_managed_entrypoint
+
+  echo "Removed codex-agents managed bundle from ${TARGET_CODEX_DIR}:"
+  list_bundle
 }
 
 case "${1:-}" in
@@ -221,6 +273,9 @@ case "${1:-}" in
     ;;
   doctor)
     doctor
+    ;;
+  uninstall)
+    uninstall_bundle
     ;;
   list)
     list_bundle
