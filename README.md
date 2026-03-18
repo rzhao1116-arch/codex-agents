@@ -6,9 +6,10 @@ This repository is released under the MIT license and is currently targeting `v0
 
 ## Command Usage Model
 
-- Bootstrap from the cloned repository with `bin/codex-agents`.
-- After running `bin/codex-agents link`, use `codex-agents` as the normal global command.
-- The examples below use `bin/codex-agents` for first-time setup and `codex-agents` for day-to-day usage after linking.
+- Default install path: Homebrew.
+- Source checkout path: bootstrap from the cloned repository with `bin/codex-agents`.
+- After Homebrew install, use `codex-agents` as the normal global command.
+- After source bootstrap, run `bin/codex-agents link` once, then use `codex-agents` as the normal global command.
 
 ## What This Repo Provides
 
@@ -39,7 +40,13 @@ This repository is released under the MIT license and is currently targeting `v0
 
 ## Install
 
-From this repository:
+Preferred Homebrew install:
+
+```bash
+brew install rzhao1116-arch/homebrew-tap/codex-agents
+```
+
+From a source checkout:
 
 ```bash
 bin/codex-agents install
@@ -85,6 +92,14 @@ And these skills:
 - `orchestrator-routing`
 
 ## Update
+
+Homebrew-managed install:
+
+```bash
+brew upgrade rzhao1116-arch/homebrew-tap/codex-agents
+```
+
+Source-managed install:
 
 ```bash
 codex-agents update
@@ -168,6 +183,8 @@ bin/codex-agents uninstall --target /tmp/test-codex-home
 It does **not** remove unrelated global skills or unrelated content from `AGENTS.md`.
 
 ## Link Into PATH
+
+Homebrew users do not need this section; `brew install` already puts `codex-agents` on `PATH`.
 
 ```bash
 bin/codex-agents link
@@ -297,7 +314,13 @@ bash tests/homebrew_formula_audit_in_temp_tap.sh
 
 ## Publishing / Sharing
 
-This repository is designed to be cloned, bootstrapped locally, and then used through the linked global command:
+Recommended public install path:
+
+```bash
+brew install rzhao1116-arch/homebrew-tap/codex-agents
+```
+
+Source bootstrap remains available for contributors and local development:
 
 ```bash
 git clone https://github.com/rzhao1116-arch/codex-agents.git
