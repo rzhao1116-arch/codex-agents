@@ -15,6 +15,8 @@ trap cleanup EXIT
 test -L "$BIN_DIR/codex-agents"
 TARGET="$(readlink "$BIN_DIR/codex-agents")"
 test "$TARGET" = "$ROOT_DIR/bin/codex-agents"
+"$BIN_DIR/codex-agents" version >/tmp/codex-agents-link-version.out
+grep -Eq '^[0-9a-f]{7,}$' /tmp/codex-agents-link-version.out
 
 "$ROOT_DIR/bin/codex-agents" unlink --bin-dir "$BIN_DIR" >/tmp/codex-agents-unlink.out
 
