@@ -22,7 +22,7 @@ class CodexAgents < Formula
     doctor_json = shell_output("#{bin}/codex-agents doctor --target #{target} --json")
     assert_match "\"orchestrator_routing_skill\": {", doctor_json
     assert_match "\"present\": true", doctor_json
-    assert_predicate target/"agents/orchestrator.md", :exist?
-    assert_predicate target/"skills/orchestrator-routing/SKILL.md", :exist?
+    assert_path_exists target/"agents/orchestrator.md"
+    assert_path_exists target/"skills/orchestrator-routing/SKILL.md"
   end
 end
