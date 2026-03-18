@@ -2,6 +2,8 @@
 
 Claude-style Codex agents plus an installed orchestrator-routing skill that makes `orchestrator` the default routing lens for non-trivial work.
 
+This repository is released under the MIT license and is currently targeting `v0.1.0` as the first versioned public release milestone.
+
 ## Command Usage Model
 
 - Bootstrap from the cloned repository with `bin/codex-agents`.
@@ -259,6 +261,16 @@ Typical routes:
 - `unlink` removes that symlink without touching the installed bundle
 - `version` prints the current bundled git short SHA
 - `list` shows the bundled agents and skills before install or update
+
+## Release Roadmap
+
+The next release-oriented milestones are:
+
+1. tag the first versioned release as `v0.1.0`
+2. publish a GitHub Release using that tag
+3. use the release tarball and checksum to draft a Homebrew formula
+
+The Homebrew preparation plan lives at [2026-03-18-homebrew-core-prep.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/plans/2026-03-18-homebrew-core-prep.md).
 
 ## Publishing / Sharing
 
