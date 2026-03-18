@@ -2,6 +2,12 @@
 
 Claude-style Codex agents plus an installed orchestrator-routing skill that makes `orchestrator` the default routing lens for non-trivial work.
 
+## Command Usage Model
+
+- Bootstrap from the cloned repository with `bin/codex-agents`.
+- After running `bin/codex-agents link`, use `codex-agents` as the normal global command.
+- The examples below use `bin/codex-agents` for first-time setup and `codex-agents` for day-to-day usage after linking.
+
 ## What This Repo Provides
 
 - A set of Codex agent baseline files in [`agents/`](/Users/ryan/Projects/Ai/other/codex-agents/agents)
@@ -79,7 +85,7 @@ And these skills:
 ## Update
 
 ```bash
-bin/codex-agents update
+codex-agents update
 ```
 
 Custom target:
@@ -93,7 +99,7 @@ Both `install` and `update` now remind the user to open a new Codex conversation
 ## Doctor
 
 ```bash
-bin/codex-agents doctor
+codex-agents doctor
 ```
 
 Custom target:
@@ -112,13 +118,13 @@ Use `doctor` to check:
 Machine-readable output:
 
 ```bash
-bin/codex-agents doctor --json
+codex-agents doctor --json
 ```
 
 ## Status
 
 ```bash
-bin/codex-agents status
+codex-agents status
 ```
 
 Custom target:
@@ -136,13 +142,13 @@ Use `status` for a quick summary when you do not need the longer `doctor` guidan
 Machine-readable output:
 
 ```bash
-bin/codex-agents status --json
+codex-agents status --json
 ```
 
 ## Uninstall
 
 ```bash
-bin/codex-agents uninstall
+codex-agents uninstall
 ```
 
 Custom target:
@@ -183,13 +189,13 @@ bin/codex-agents unlink --bin-dir /tmp/test-bin
 To remove the link:
 
 ```bash
-bin/codex-agents unlink
+codex-agents unlink
 ```
 
 ## Version
 
 ```bash
-bin/codex-agents version
+codex-agents version
 ```
 
 `version` prints the current bundled git commit short SHA. This is intended as a lightweight support identifier until the repo grows a fuller release/versioning model.
@@ -197,7 +203,7 @@ bin/codex-agents version
 ## List Bundled Files
 
 ```bash
-bin/codex-agents list
+codex-agents list
 ```
 
 ## How To Use
@@ -256,12 +262,14 @@ Typical routes:
 
 ## Publishing / Sharing
 
-This repository is designed to be cloned and then installed locally:
+This repository is designed to be cloned, bootstrapped locally, and then used through the linked global command:
 
 ```bash
 git clone https://github.com/rzhao1116-arch/codex-agents.git
 cd codex-agents
 bin/codex-agents install
+bin/codex-agents link
+codex-agents status
 ```
 
 ## Design Notes
