@@ -7,9 +7,8 @@ This repository is released under the MIT license and is currently targeting `v0
 ## Command Usage Model
 
 - Default install path: Homebrew.
-- Source checkout path: bootstrap from the cloned repository with `bin/codex-agents`.
 - After Homebrew install, use `codex-agents` as the normal global command.
-- After source bootstrap, run `bin/codex-agents link` once, then use `codex-agents` as the normal global command.
+- Source checkout remains available for contributors and local development.
 
 ## What This Repo Provides
 
@@ -46,16 +45,10 @@ Preferred Homebrew install:
 brew install rzhao1116-arch/homebrew-tap/codex-agents
 ```
 
-From a source checkout:
-
-```bash
-bin/codex-agents install
-```
-
 Or install into a custom Codex home:
 
 ```bash
-bin/codex-agents install --target /tmp/test-codex-home
+codex-agents install --target /tmp/test-codex-home
 ```
 
 This installs bundled files into:
@@ -108,7 +101,7 @@ codex-agents update
 Custom target:
 
 ```bash
-bin/codex-agents update --target /tmp/test-codex-home
+codex-agents update --target /tmp/test-codex-home
 ```
 
 Both `install` and `update` now remind the user to open a new Codex conversation so the refreshed skill list is picked up.
@@ -122,7 +115,7 @@ codex-agents doctor
 Custom target:
 
 ```bash
-bin/codex-agents doctor --target /tmp/test-codex-home
+codex-agents doctor --target /tmp/test-codex-home
 ```
 
 Use `doctor` to check:
@@ -147,7 +140,7 @@ codex-agents status
 Custom target:
 
 ```bash
-bin/codex-agents status --target /tmp/test-codex-home
+codex-agents status --target /tmp/test-codex-home
 ```
 
 Use `status` for a quick summary when you do not need the longer `doctor` guidance. It reports whether:
@@ -171,7 +164,7 @@ codex-agents uninstall
 Custom target:
 
 ```bash
-bin/codex-agents uninstall --target /tmp/test-codex-home
+codex-agents uninstall --target /tmp/test-codex-home
 ```
 
 `uninstall` removes only the bundle managed by this repo:
@@ -181,35 +174,6 @@ bin/codex-agents uninstall --target /tmp/test-codex-home
 - the managed entrypoint block in `~/.codex/AGENTS.md`
 
 It does **not** remove unrelated global skills or unrelated content from `AGENTS.md`.
-
-## Link Into PATH
-
-Homebrew users do not need this section; `brew install` already puts `codex-agents` on `PATH`.
-
-```bash
-bin/codex-agents link
-```
-
-This creates:
-
-```bash
-~/.local/bin/codex-agents
-```
-
-pointing at this repository's [`bin/codex-agents`](/Users/ryan/Projects/Ai/other/codex-agents/bin/codex-agents).
-
-Custom bin dir:
-
-```bash
-bin/codex-agents link --bin-dir /tmp/test-bin
-bin/codex-agents unlink --bin-dir /tmp/test-bin
-```
-
-To remove the link:
-
-```bash
-codex-agents unlink
-```
 
 ## Version
 
@@ -274,8 +238,6 @@ Typical routes:
 - `uninstall` removes only the bundle managed by this repository
 - `doctor` checks installed state and explains common “installed but not visible in current conversation” situations
 - `doctor --json` returns the same diagnostic model in machine-readable form
-- `link` creates a symlink in `~/.local/bin` so `codex-agents` can be called directly
-- `unlink` removes that symlink without touching the installed bundle
 - `version` prints the current bundled git short SHA
 - `list` shows the bundled agents and skills before install or update
 
@@ -329,6 +291,8 @@ bin/codex-agents install
 bin/codex-agents link
 codex-agents status
 ```
+
+If you do not want to link the repo-local CLI into `PATH`, you can keep using `bin/codex-agents` directly from the checkout.
 
 ## Design Notes
 
