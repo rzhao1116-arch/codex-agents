@@ -24,6 +24,17 @@ Do not use this skill for obviously trivial single-step questions that already m
 4. Decide which downstream skill or specialist should go next
 5. Stop early, downgrade, upgrade, or reroute when the current chain is no longer justified
 
+## Required Output Shape
+
+For non-trivial routed work, make the routing visible before continuing. Start with a short routing block that includes:
+
+- `complexity`: `simple`, `multi-step`, or `complex`
+- `role-chain`: the smallest useful role chain
+- `next-step`: the next downstream skill or specialist
+- `reason`: the main reason this chain was chosen
+
+Keep this block concise and put it before deeper design or implementation guidance. The goal is that a user can tell at a glance whether `orchestrator-routing` actually took control.
+
 ## Complexity Model
 
 ### `simple`
@@ -109,6 +120,27 @@ After routing, choose the next skill or role instead of jumping straight into im
 - If the task is already implementation-complete and needs risk checking -> use `requesting-code-review`
 
 This skill decides whether those downstream skills should run next. It should come before them for complex routing decisions.
+
+## Response Pattern
+
+For routed work, follow this order:
+
+1. Emit the short routing block:
+   - `complexity`
+   - `role-chain`
+   - `next-step`
+   - `reason`
+2. Call out the most important uncertainty or gating fact.
+3. Continue into the chosen downstream skill or specialist only after the route is explicit.
+
+Example shape:
+
+```text
+complexity: complex
+role-chain: product-manager -> docs-researcher -> brainstorming -> implementation -> code-reviewer -> reality-checker
+next-step: brainstorming
+reason: the task crosses product, data-source, implementation, and acceptance phases, but the data source is still unresolved
+```
 
 ## Stop, Downgrade, Upgrade, and Reroute
 

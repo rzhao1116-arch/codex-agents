@@ -129,6 +129,11 @@ bin/codex-agents list
 - After install, the managed `AGENTS.md` block makes non-trivial multi-phase work prefer the `orchestrator-routing` skill first.
 - Let `orchestrator-routing` classify the task as `simple`, `multi-step`, or `complex`.
 - Let `orchestrator-routing` prune the smallest useful role chain instead of defaulting to the full role set.
+- Let `orchestrator-routing` make that routing explicit with:
+  - `complexity`
+  - `role-chain`
+  - `next-step`
+  - `reason`
 - Let `orchestrator-routing` decide whether the next phase should enter `brainstorming`, `writing-plans`, implementation skills, or stop early.
 - Keep `orchestrator.md` as the baseline role definition behind that routing behavior.
 - Keep stronger local global rules and repository-local rules above these generic baselines.
@@ -140,9 +145,14 @@ Use the installed bundle as a lightweight default-entrypoint orchestration syste
 1. Present the task normally.
 2. Let the managed entrypoint rule route non-trivial work into `orchestrator-routing`.
 3. Let `orchestrator-routing` classify it as `simple`, `multi-step`, or `complex`.
-4. Let `orchestrator-routing` choose the smallest useful role chain and next downstream skill.
-5. Let that chain continue only while each next role is still justified.
-6. End early when the task is already resolved, or reroute when the current path breaks.
+4. Let `orchestrator-routing` explicitly show:
+   - `complexity`
+   - `role-chain`
+   - `next-step`
+   - `reason`
+5. Let `orchestrator-routing` choose the smallest useful role chain and next downstream skill.
+6. Let that chain continue only while each next role is still justified.
+7. End early when the task is already resolved, or reroute when the current path breaks.
 
 Typical routes:
 
