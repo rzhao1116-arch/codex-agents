@@ -37,6 +37,12 @@ From this repository:
 bin/codex-agents install
 ```
 
+Or install into a custom Codex home:
+
+```bash
+bin/codex-agents install --target /tmp/test-codex-home
+```
+
 This installs bundled files into:
 
 ```bash
@@ -76,12 +82,24 @@ And these skills:
 bin/codex-agents update
 ```
 
+Custom target:
+
+```bash
+bin/codex-agents update --target /tmp/test-codex-home
+```
+
 Both `install` and `update` now remind the user to open a new Codex conversation so the refreshed skill list is picked up.
 
 ## Doctor
 
 ```bash
 bin/codex-agents doctor
+```
+
+Custom target:
+
+```bash
+bin/codex-agents doctor --target /tmp/test-codex-home
 ```
 
 Use `doctor` to check:
@@ -97,6 +115,12 @@ Use `doctor` to check:
 bin/codex-agents status
 ```
 
+Custom target:
+
+```bash
+bin/codex-agents status --target /tmp/test-codex-home
+```
+
 Use `status` for a quick summary when you do not need the longer `doctor` guidance. It reports whether:
 
 - the managed agents directory exists
@@ -107,6 +131,12 @@ Use `status` for a quick summary when you do not need the longer `doctor` guidan
 
 ```bash
 bin/codex-agents uninstall
+```
+
+Custom target:
+
+```bash
+bin/codex-agents uninstall --target /tmp/test-codex-home
 ```
 
 `uninstall` removes only the bundle managed by this repo:
@@ -165,6 +195,7 @@ Typical routes:
 ## Release Model
 
 - `install` is for first-time setup into `~/.codex`
+- `install` and `update` also accept `--target <path>` to install into a different Codex home root
 - `update` overwrites installed agent files, skills, and the managed entrypoint block with the current repo version
 - `status` gives a lightweight installed-state summary
 - `uninstall` removes only the bundle managed by this repository
