@@ -1,14 +1,14 @@
 # codex-agents
 
-Claude-style Codex agents plus a default-entrypoint orchestrator that automatically prunes the smallest useful role chain for a task.
+Claude-style Codex agents plus an installed orchestrator-routing skill that makes `orchestrator` the default routing lens for non-trivial work.
 
 ## What This Repo Provides
 
 - A set of Codex agent baseline files in [`agents/`](/Users/ryan/Projects/Ai/other/codex-agents/agents)
-- A top-level [`orchestrator.md`](/Users/ryan/Projects/Ai/other/codex-agents/agents/orchestrator.md) that acts as the default entrypoint for non-trivial work
+- A baseline orchestration role in [`agents/orchestrator.md`](/Users/ryan/Projects/Ai/other/codex-agents/agents/orchestrator.md)
+- An installable routing skill in [`skills/orchestrator-routing/SKILL.md`](/Users/ryan/Projects/Ai/other/codex-agents/skills/orchestrator-routing/SKILL.md)
 - A simple installer CLI in [`bin/codex-agents`](/Users/ryan/Projects/Ai/other/codex-agents/bin/codex-agents)
 - A tool-managed entrypoint block in `~/.codex/AGENTS.md` so installed users automatically get orchestrator-first routing behavior
-- A Claude-style `~/.codex/agents/` installation model that keeps the first version easy to understand and easy to update
 
 ## Included Agents
 
@@ -24,6 +24,10 @@ Claude-style Codex agents plus a default-entrypoint orchestrator that automatica
 - `reality-checker`
 - `technical-writer`
 
+## Included Skills
+
+- `orchestrator-routing`
+
 ## Install
 
 From this repository:
@@ -32,10 +36,11 @@ From this repository:
 bin/codex-agents install
 ```
 
-This copies all bundled agent files into:
+This installs bundled files into:
 
 ```bash
 ~/.codex/agents/
+~/.codex/skills/
 ```
 
 It also writes or updates a tool-managed block in:
@@ -44,9 +49,9 @@ It also writes or updates a tool-managed block in:
 ~/.codex/AGENTS.md
 ```
 
-That block tells Codex to prefer `orchestrator` as the default entrypoint for non-trivial multi-phase work.
+That block tells Codex to prefer the installed `orchestrator-routing` skill for non-trivial multi-phase work. The skill then routes into `orchestrator` and downstream skills.
 
-The first install creates these files:
+The first install creates these agent files:
 
 - `orchestrator.md`
 - `product-manager.md`
@@ -60,13 +65,17 @@ The first install creates these files:
 - `reality-checker.md`
 - `technical-writer.md`
 
+And these skills:
+
+- `orchestrator-routing`
+
 ## Update
 
 ```bash
 bin/codex-agents update
 ```
 
-## List Bundled Agents
+## List Bundled Files
 
 ```bash
 bin/codex-agents list
@@ -74,37 +83,38 @@ bin/codex-agents list
 
 ## How To Use
 
-- Treat these agent files as a lightweight role system for Codex.
-- After install, the managed `AGENTS.md` block makes non-trivial multi-phase work prefer `orchestrator` first.
-- Let `orchestrator` classify the task as `simple`, `multi-step`, or `complex`.
-- Let `orchestrator` prune the smallest useful role chain instead of defaulting to the full role set.
-- Allow `orchestrator` to stop early, downgrade, upgrade, or reroute when the initial chain is wrong.
+- Treat the installed files as a lightweight role-and-routing system for Codex.
+- After install, the managed `AGENTS.md` block makes non-trivial multi-phase work prefer the `orchestrator-routing` skill first.
+- Let `orchestrator-routing` classify the task as `simple`, `multi-step`, or `complex`.
+- Let `orchestrator-routing` prune the smallest useful role chain instead of defaulting to the full role set.
+- Let `orchestrator-routing` decide whether the next phase should enter `brainstorming`, `writing-plans`, implementation skills, or stop early.
+- Keep `orchestrator.md` as the baseline role definition behind that routing behavior.
 - Keep stronger local global rules and repository-local rules above these generic baselines.
 
 ## Practical Usage Pattern
 
-Use the installed role files as a lightweight default-entrypoint orchestration system:
+Use the installed bundle as a lightweight default-entrypoint orchestration system:
 
 1. Present the task normally.
-2. Let the managed entrypoint rule route non-trivial work into `orchestrator`.
-3. Let `orchestrator` classify it as `simple`, `multi-step`, or `complex`.
-4. Let `orchestrator` choose the smallest useful role chain.
+2. Let the managed entrypoint rule route non-trivial work into `orchestrator-routing`.
+3. Let `orchestrator-routing` classify it as `simple`, `multi-step`, or `complex`.
+4. Let `orchestrator-routing` choose the smallest useful role chain and next downstream skill.
 5. Let that chain continue only while each next role is still justified.
 6. End early when the task is already resolved, or reroute when the current path breaks.
 
 Typical routes:
 
-- ambiguous request -> `product-manager -> ...`
-- flow/interaction problem -> `ux-architect -> frontend-developer -> reality-checker`
-- architecture-heavy backend change -> `software-architect -> backend-architect -> code-reviewer -> reality-checker`
-- official docs / SDK / MCP / platform question -> `docs-researcher`, then stop early if that already resolves the task
-- delivery-bound implementation -> implementer role -> `code-reviewer -> reality-checker`
+- ambiguous request -> `orchestrator-routing -> product-manager -> ...`
+- flow/interaction problem -> `orchestrator-routing -> ux-architect -> frontend-developer -> reality-checker`
+- architecture-heavy backend change -> `orchestrator-routing -> software-architect -> backend-architect -> code-reviewer -> reality-checker`
+- official docs / SDK / MCP / platform question -> `orchestrator-routing -> docs-researcher`, then stop early if that already resolves the task
+- new feature requiring design -> `orchestrator-routing -> brainstorming -> implementation chain`
 
 ## Release Model
 
-- `install` is for first-time setup into `~/.codex/agents/`
-- `update` is for overwriting installed agent files with the current repo version
-- `list` is for checking the bundled role set before install or update
+- `install` is for first-time setup into `~/.codex`
+- `update` overwrites installed agent files, skills, and the managed entrypoint block with the current repo version
+- `list` shows the bundled agents and skills before install or update
 
 ## Publishing / Sharing
 
@@ -118,9 +128,10 @@ bin/codex-agents install
 
 ## Design Notes
 
-- This repo intentionally installs directly into `~/.codex/agents/`, similar to the way Claude-style agent directories are commonly organized.
+- This repo intentionally installs directly into `~/.codex/agents/` and `~/.codex/skills/`, similar to the way Claude-style agent directories are commonly organized.
 - The first version does not modify user `config.toml`.
 - The first version does manage a clearly marked entrypoint block in `~/.codex/AGENTS.md` because current Codex behavior does not expose a built-in default-agent hook through `agents/` alone.
-- The main feature is the default-entrypoint behavior of `orchestrator`, not just the presence of many role files.
+- The first version also installs an explicit `orchestrator-routing` skill so the routing behavior participates in skill-first workflows instead of losing priority to existing skills.
+- The main feature is the default-entrypoint behavior of `orchestrator-routing` plus `orchestrator`, not just the presence of many role files.
 - The first version aims for automatic chain pruning and automatic continuation through the smallest useful role sequence.
 - The first version still does not promise perfect routing, hidden Codex hooks, or a flawless autonomous execution engine.
