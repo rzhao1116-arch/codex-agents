@@ -42,6 +42,8 @@ Codex supports subagents, but users do not get a ready-made role set, a clear Cl
   - `list`
 - installation target:
   - `~/.codex/agents/`
+- a tool-managed entrypoint block in:
+  - `~/.codex/AGENTS.md`
 - public GitHub repository distribution
 - automatic task classification inside `orchestrator`:
   - `simple`
@@ -53,7 +55,6 @@ Codex supports subagents, but users do not get a ready-made role set, a clear Cl
 
 ### Not Included
 
-- automatic modification of user `AGENTS.md`
 - automatic modification of user `config.toml`
 - dynamic agent generation
 - complex multi-source vendor syncing
@@ -77,6 +78,7 @@ codex-agents/
 
 - `agents/` is the source-of-truth role bundle
 - `bin/codex-agents` copies those files into `~/.codex/agents/`
+- `bin/codex-agents` also creates or updates a clearly marked managed block in `~/.codex/AGENTS.md`
 - `orchestrator.md` is the default entrypoint for complex or ambiguous work
 - `orchestrator.md` first classifies task complexity, then prunes the smallest necessary role chain, then drives continuous orchestration to a final result
 - `orchestrator.md` may stop early, downgrade, upgrade, or reroute when new information invalidates the original chain
@@ -88,11 +90,13 @@ codex-agents/
 
 - create `~/.codex/agents/` if missing
 - copy all bundled `.md` files into the target directory
+- create or update the managed `~/.codex/AGENTS.md` entrypoint block
 - print the installed role list
 
 ### `update`
 
 - overwrite previously installed role files from the current repo contents
+- replace the managed `~/.codex/AGENTS.md` entrypoint block with the current repo version
 - print the bundled role list
 
 ### `list`
@@ -107,14 +111,16 @@ codex-agents/
 2. User runs `bin/codex-agents install`.
 3. Tool creates `~/.codex/agents/` if needed.
 4. Tool copies bundled role files into that directory.
-5. User can inspect the installed role files and treat `orchestrator` as the default entrypoint for non-trivial work.
+5. Tool creates or updates a clearly marked managed block in `~/.codex/AGENTS.md`.
+6. User can inspect the installed role files and gets orchestrator-first routing behavior without manually editing rules.
 
 ### Update Flow
 
 1. User pulls the latest repository changes.
 2. User runs `bin/codex-agents update`.
 3. Tool overwrites installed role files with the current repository versions.
-4. User continues with the updated role set.
+4. Tool replaces the managed entrypoint block with the current version.
+5. User continues with the updated role set and managed routing behavior.
 
 ### Typical Usage Flow
 
@@ -244,12 +250,15 @@ When multiple roles appear relevant, prefer this ordering:
 - If a repository has its own `AGENTS.md`, `.codex/model-instructions.md`, or `.codex/skills-guidelines.md`, those local rules remain stronger.
 - `orchestrator` should route work in a way that respects local verification, review, and acceptance requirements rather than bypassing them.
 - Automatic orchestration should still treat local project rules as stronger than the generic role bundle.
+- The managed global entrypoint block is a convenience layer for default behavior, not stronger authority than repository-local rules.
 - This tool is intended to complement project-local workflows, not replace them.
 
 ## Failure Cases
 
 - If `~/.codex/agents/` does not exist, `install` should create it.
+- If `~/.codex/AGENTS.md` does not exist, `install` should create it.
 - If target role files already exist, `install` and `update` may overwrite them in v1; this is acceptable for the first version and should be documented clearly.
+- If `~/.codex/AGENTS.md` already exists, `install` and `update` should replace only the managed block instead of clobbering the whole file.
 - If the source `agents/` directory is incomplete or missing, CLI commands should fail fast instead of silently installing a partial set.
 - If the initial complexity classification is wrong, `orchestrator` should downgrade, upgrade, or reroute instead of mechanically continuing the original chain.
 - If a role fully resolves the task, orchestration should stop early instead of forcing the rest of the chain.
@@ -263,11 +272,12 @@ v1 is acceptable when all of the following are true:
 
 1. `bin/codex-agents list` prints the bundled role set.
 2. `bin/codex-agents install` creates or updates `~/.codex/agents/` with the bundled role files.
-3. `bin/codex-agents update` overwrites installed role files from the repo bundle.
-4. `agents/orchestrator.md` clearly explains complexity classification, role selection heuristics, priority rules, automatic chaining behavior, and stop/reroute rules.
-5. `README.md` clearly explains installation, update, list, the default-entrypoint role of `orchestrator`, and the high-level usage model.
-6. The repository can be cloned from GitHub and installed with the documented commands.
-7. The spec clearly explains install flow, update flow, complexity handling, routing examples, project integration boundaries, and expected failure cases.
+3. `bin/codex-agents install` creates or updates a clearly marked managed entrypoint block in `~/.codex/AGENTS.md`.
+4. `bin/codex-agents update` overwrites installed role files from the repo bundle and refreshes the managed entrypoint block.
+5. `agents/orchestrator.md` clearly explains complexity classification, role selection heuristics, priority rules, automatic chaining behavior, and stop/reroute rules.
+6. `README.md` clearly explains installation, update, list, the managed entrypoint behavior, and the high-level usage model.
+7. The repository can be cloned from GitHub and installed with the documented commands.
+8. The spec clearly explains install flow, update flow, complexity handling, routing examples, project integration boundaries, and expected failure cases.
 
 ## Current Prototype Mapping
 
@@ -279,10 +289,10 @@ Already implemented in prototype form:
 - CLI commands
 - installation into `~/.codex/agents/`
 - public GitHub repository
+- managed `~/.codex/AGENTS.md` entrypoint integration
 
 Not yet implemented in the current prototype:
 
-- richer `orchestrator` behavior matching the complexity and chaining model in this spec
 - README positioning that treats `orchestrator` as the default entrypoint rather than only a routing reference
 
 ## Next Likely Improvements After v1
