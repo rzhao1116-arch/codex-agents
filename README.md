@@ -273,6 +273,19 @@ The next release-oriented milestones are:
 The Homebrew preparation plan lives at [2026-03-18-homebrew-core-prep.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/plans/2026-03-18-homebrew-core-prep.md).
 The first release checklist lives at [2026-03-18-v0-1-0-release-checklist.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/plans/2026-03-18-v0-1-0-release-checklist.md).
 The draft release notes live at [v0.1.0.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.0.md).
+The current Homebrew formula draft lives at [codex-agents.rb](/Users/ryan/Projects/Ai/other/codex-agents/Formula/codex-agents.rb).
+
+## Homebrew Draft
+
+The repository now includes a Homebrew formula draft aimed at a future `homebrew-core` submission path:
+
+```bash
+bash tests/homebrew_formula_temp_tap_roundtrip.sh
+```
+
+The draft currently uses the `v0.1.0` release tarball and checksum. It installs the bundled repository layout into Homebrew `libexec` and exposes the CLI with `bin.write_exec_script`.
+
+Current Homebrew releases reject non-tap local formula installs, so this repo validates the draft by copying it into a temporary tap, installing from that tap, running `brew test`, and cleaning up afterwards.
 
 ## Publishing / Sharing
 
