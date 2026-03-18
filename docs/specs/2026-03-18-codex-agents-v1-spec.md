@@ -103,6 +103,8 @@ codex-agents/
 - `bin/codex-agents` copies agent files into `~/.codex/agents/`
 - `bin/codex-agents` copies skill directories into `~/.codex/skills/`
 - `bin/codex-agents` creates or updates a clearly marked managed block in `~/.codex/AGENTS.md`
+- `bin/codex-agents link` creates the global `codex-agents` entrypoint in `~/.local/bin/`
+- after linking, the intended day-to-day command form is `codex-agents ...`
 - `orchestrator-routing` is the default entrypoint for complex or ambiguous work
 - `orchestrator-routing` first classifies task complexity, then prunes the smallest necessary role chain, then chooses downstream skills and roles toward a final result
 - `orchestrator-routing` makes that routing visible with a short output block before deeper guidance continues
@@ -185,23 +187,24 @@ codex-agents/
 
 1. User clones the repository.
 2. User runs `bin/codex-agents install`.
-3. Tool creates `~/.codex/agents/` if needed.
-4. Tool creates `~/.codex/skills/` if needed.
-5. Tool copies bundled role files and skill directories into those targets.
-6. Tool creates or updates a clearly marked managed block in `~/.codex/AGENTS.md`.
-7. User can inspect the installed role files and skills and gets orchestrator-first routing behavior without manually editing rules.
+3. User runs `bin/codex-agents link`.
+4. Tool creates `~/.codex/agents/` if needed.
+5. Tool creates `~/.codex/skills/` if needed.
+6. Tool copies bundled role files and skill directories into those targets.
+7. Tool creates or updates a clearly marked managed block in `~/.codex/AGENTS.md`.
+8. User can use `codex-agents ...` as the normal global command and gets orchestrator-first routing behavior without manually editing rules.
 
 ### Update Flow
 
 1. User pulls the latest repository changes.
-2. User runs `bin/codex-agents update`.
+2. User runs `codex-agents update`.
 3. Tool overwrites installed role files and skills with the current repository versions.
 4. Tool replaces the managed entrypoint block with the current version.
 5. User continues with the updated role set, skill bundle, and managed routing behavior.
 
 ### Uninstall Flow
 
-1. User runs `bin/codex-agents uninstall`.
+1. User runs `codex-agents uninstall`.
 2. Tool removes the bundled agent files from `~/.codex/agents/`.
 3. Tool removes bundled skills from `~/.codex/skills/`.
 4. Tool removes the managed `AGENTS.md` entrypoint block.
@@ -209,7 +212,7 @@ codex-agents/
 
 ### Doctor Flow
 
-1. User runs `bin/codex-agents doctor`.
+1. User runs `codex-agents doctor`.
 2. Tool checks the installed agent directory, skill directory, and managed `AGENTS.md` block.
 3. Tool reports pass/fail status for each check.
 4. Tool explains likely causes of “installed but unavailable in current conversation.”
@@ -220,7 +223,7 @@ codex-agents/
 
 ### Status Flow
 
-1. User runs `bin/codex-agents status`.
+1. User runs `codex-agents status`.
 2. Tool prints a short installed-state summary.
 3. User escalates to `doctor` only when the lightweight summary is insufficient.
 
