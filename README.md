@@ -91,6 +91,18 @@ Use `doctor` to check:
 - whether the managed `AGENTS.md` block is present and up to date
 - whether the most likely issue is simply that the current conversation needs a fresh skill index
 
+## Status
+
+```bash
+bin/codex-agents status
+```
+
+Use `status` for a quick summary when you do not need the longer `doctor` guidance. It reports whether:
+
+- the managed agents directory exists
+- `orchestrator-routing` is installed
+- the managed `AGENTS.md` block is present
+
 ## Uninstall
 
 ```bash
@@ -144,6 +156,7 @@ Typical routes:
 
 - `install` is for first-time setup into `~/.codex`
 - `update` overwrites installed agent files, skills, and the managed entrypoint block with the current repo version
+- `status` gives a lightweight installed-state summary
 - `uninstall` removes only the bundle managed by this repository
 - `doctor` checks installed state and explains common “installed but not visible in current conversation” situations
 - `list` shows the bundled agents and skills before install or update

@@ -47,6 +47,7 @@ That makes role-driven delegation harder to adopt consistently, harder to share,
 - a CLI with:
   - `install`
   - `update`
+  - `status`
   - `doctor`
   - `uninstall`
   - `list`
@@ -131,6 +132,13 @@ codex-agents/
   - `Next actions`
 - explain the common case where the skill is installed on disk but an already-open conversation still has a stale skill list
 
+### `status`
+
+- report whether the managed agents directory exists
+- report whether `orchestrator-routing` is installed
+- report whether the managed entrypoint block is present
+- provide a lightweight summary without the longer diagnostic guidance from `doctor`
+
 ### `uninstall`
 
 - remove bundled agent files previously installed by this repo
@@ -176,6 +184,12 @@ codex-agents/
    - reinstall if files are missing
    - open a new conversation if the skill exists on disk
    - restart the app only if a fresh conversation still does not see the skill
+
+### Status Flow
+
+1. User runs `bin/codex-agents status`.
+2. Tool prints a short installed-state summary.
+3. User escalates to `doctor` only when the lightweight summary is insufficient.
 
 ### Typical Usage Flow
 
@@ -280,6 +294,7 @@ The routing skill should choose whether those downstream skills run next. It sho
 - `install` creates or updates the managed `~/.codex/AGENTS.md` block.
 - `install` and `update` remind the user to open a new conversation so the refreshed skill list is visible.
 - `update` overwrites the installed files with current repository contents.
+- `status` reports a lightweight installed-state summary.
 - `doctor` reports installed state and common stale-session guidance.
 - `uninstall` removes only the bundle managed by this repo and leaves unrelated files intact.
 - `list` prints the bundled role and skill set.
