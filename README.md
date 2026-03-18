@@ -159,6 +159,33 @@ bin/codex-agents uninstall --target /tmp/test-codex-home
 
 It does **not** remove unrelated global skills or unrelated content from `AGENTS.md`.
 
+## Link Into PATH
+
+```bash
+bin/codex-agents link
+```
+
+This creates:
+
+```bash
+~/.local/bin/codex-agents
+```
+
+pointing at this repository's [`bin/codex-agents`](/Users/ryan/Projects/Ai/other/codex-agents/bin/codex-agents).
+
+Custom bin dir:
+
+```bash
+bin/codex-agents link --bin-dir /tmp/test-bin
+bin/codex-agents unlink --bin-dir /tmp/test-bin
+```
+
+To remove the link:
+
+```bash
+bin/codex-agents unlink
+```
+
 ## Version
 
 ```bash
@@ -222,6 +249,8 @@ Typical routes:
 - `uninstall` removes only the bundle managed by this repository
 - `doctor` checks installed state and explains common “installed but not visible in current conversation” situations
 - `doctor --json` returns the same diagnostic model in machine-readable form
+- `link` creates a symlink in `~/.local/bin` so `codex-agents` can be called directly
+- `unlink` removes that symlink without touching the installed bundle
 - `version` prints the current bundled git short SHA
 - `list` shows the bundled agents and skills before install or update
 
