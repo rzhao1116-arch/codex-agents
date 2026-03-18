@@ -18,6 +18,7 @@ usage() {
 Usage:
   codex-agents install   Copy bundled agents and skills into ~/.codex
   codex-agents update    Overwrite installed agents and skills from the current repo
+  codex-agents doctor    Check installed agents, skills, and managed entrypoint state
   codex-agents list      List bundled agent files and skills
 EOF
 }
@@ -40,6 +41,114 @@ list_bundle() {
   echo
   echo "Bundled skills:"
   list_skills
+}
+
+check_path_exists() {
+  local label="$1"
+  local path="$2"
+
+  if [[ -e "${path}" ]]; then
+    printf "OK    %s: %s\n" "${label}" "${path}"
+    return 0
+  fi
+
+  printf "FAIL  %s: missing %s\n" "${label}" "${path}"
+  return 1
+}
+
+check_managed_entrypoint() {
+  if [[ ! -f "${TARGET_AGENTS_RULES_FILE}" ]]; then
+    printf "FAIL  managed entrypoint: missing %s\n" "${TARGET_AGENTS_RULES_FILE}"
+    return 1
+  fi
+
+  local contents
+  contents="$(cat "${TARGET_AGENTS_RULES_FILE}")"
+
+  if [[ "${contents}" == *"${ENTRYPOINT_BEGIN}"* && "${contents}" == *"${ENTRYPOINT_END}"* ]]; then
+    if [[ "${contents}" == *"orchestrator-routing"* ]]; then
+      printf "OK    managed entrypoint: orchestrator-routing block present\n"
+      return 0
+    fi
+
+    printf "WARN  managed entrypoint: managed block present but missing orchestrator-routing language\n"
+    return 0
+  fi
+
+  printf "FAIL  managed entrypoint: managed block missing from %s\n" "${TARGET_AGENTS_RULES_FILE}"
+  return 1
+}
+
+doctor() {
+  local failures=0
+  local warnings=0
+  local installed_agents=0
+  local installed_skills=0
+
+  echo "Checks"
+  echo "------"
+
+  check_path_exists "agents dir" "${TARGET_AGENTS_DIR}" || failures=$((failures + 1))
+  check_path_exists "skills dir" "${TARGET_SKILLS_DIR}" || failures=$((failures + 1))
+  check_path_exists "orchestrator agent" "${TARGET_AGENTS_DIR}/orchestrator.md" || failures=$((failures + 1))
+  check_path_exists "orchestrator-routing skill" "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md" || failures=$((failures + 1))
+
+  if ! check_managed_entrypoint; then
+    failures=$((failures + 1))
+  fi
+
+  if [[ -d "${TARGET_AGENTS_DIR}" ]]; then
+    installed_agents="$(find "${TARGET_AGENTS_DIR}" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
+    printf "OK    installed agents count: %s\n" "${installed_agents}"
+  fi
+
+  if [[ -d "${TARGET_SKILLS_DIR}" ]]; then
+    installed_skills="$(find "${TARGET_SKILLS_DIR}" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
+    printf "OK    installed skills count: %s\n" "${installed_skills}"
+  fi
+
+  echo
+  echo "Findings"
+  echo "--------"
+
+  if (( failures == 0 )); then
+    echo "- Installation looks healthy."
+  else
+    echo "- Found ${failures} failing check(s)."
+  fi
+
+  if [[ -f "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md" ]]; then
+    echo "- The orchestrator-routing skill is installed on disk."
+    echo "- If a current Codex conversation still says the skill is unavailable, the most likely cause is a stale session skill index."
+    warnings=$((warnings + 1))
+  fi
+
+  if [[ -f "${TARGET_AGENTS_RULES_FILE}" ]]; then
+    echo "- The managed AGENTS block only sets the default routing preference; it does not force an already-open conversation to refresh its skill list."
+  fi
+
+  echo
+  echo "Next actions"
+  echo "------------"
+
+  if (( failures > 0 )); then
+    echo "- Run \`bin/codex-agents install\` to (re)install the bundle."
+  fi
+
+  if [[ -f "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md" ]]; then
+    echo "- Open a new Codex conversation after install/update so the new skill list is picked up."
+    echo "- If a fresh conversation still cannot see the skill, restart the Codex app and run \`bin/codex-agents doctor\` again."
+  fi
+
+  if (( failures == 0 )); then
+    echo "- You can test routing with: 用 orchestrator-routing skill。开发一个实时监控 Codex 配额用量的功能页面。"
+  fi
+
+  if (( warnings > 0 )); then
+    return 0
+  fi
+
+  return "${failures}"
 }
 
 managed_entrypoint_block() {
@@ -109,6 +218,9 @@ case "${1:-}" in
     ;;
   update)
     update_agents
+    ;;
+  doctor)
+    doctor
     ;;
   list)
     list_bundle

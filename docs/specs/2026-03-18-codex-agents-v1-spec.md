@@ -47,6 +47,7 @@ That makes role-driven delegation harder to adopt consistently, harder to share,
 - a CLI with:
   - `install`
   - `update`
+  - `doctor`
   - `list`
 - installation targets:
   - `~/.codex/agents/`
@@ -118,6 +119,17 @@ codex-agents/
 
 - print the bundled role filenames and skill directory names without installing
 
+### `doctor`
+
+- check whether `~/.codex/agents/` exists
+- check whether `~/.codex/skills/orchestrator-routing/SKILL.md` exists
+- check whether the managed `~/.codex/AGENTS.md` block exists and mentions `orchestrator-routing`
+- print three sections:
+  - `Checks`
+  - `Findings`
+  - `Next actions`
+- explain the common case where the skill is installed on disk but an already-open conversation still has a stale skill list
+
 ## User Flows
 
 ### First-Time Install Flow
@@ -137,6 +149,17 @@ codex-agents/
 3. Tool overwrites installed role files and skills with the current repository versions.
 4. Tool replaces the managed entrypoint block with the current version.
 5. User continues with the updated role set, skill bundle, and managed routing behavior.
+
+### Doctor Flow
+
+1. User runs `bin/codex-agents doctor`.
+2. Tool checks the installed agent directory, skill directory, and managed `AGENTS.md` block.
+3. Tool reports pass/fail status for each check.
+4. Tool explains likely causes of “installed but unavailable in current conversation.”
+5. Tool recommends next actions, usually:
+   - reinstall if files are missing
+   - open a new conversation if the skill exists on disk
+   - restart the app only if a fresh conversation still does not see the skill
 
 ### Typical Usage Flow
 
@@ -240,6 +263,7 @@ The routing skill should choose whether those downstream skills run next. It sho
 - `install` copies all bundled skill directories into `~/.codex/skills/`.
 - `install` creates or updates the managed `~/.codex/AGENTS.md` block.
 - `update` overwrites the installed files with current repository contents.
+- `doctor` reports installed state and common stale-session guidance.
 - `list` prints the bundled role and skill set.
 - README explains install, update, list, skill-first routing behavior, and scope boundaries.
 - The repository remains easy to clone and use without additional packaging or config mutation beyond the managed `AGENTS.md` block.

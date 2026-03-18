@@ -9,6 +9,7 @@ Claude-style Codex agents plus an installed orchestrator-routing skill that make
 - An installable routing skill in [`skills/orchestrator-routing/SKILL.md`](/Users/ryan/Projects/Ai/other/codex-agents/skills/orchestrator-routing/SKILL.md)
 - A simple installer CLI in [`bin/codex-agents`](/Users/ryan/Projects/Ai/other/codex-agents/bin/codex-agents)
 - A tool-managed entrypoint block in `~/.codex/AGENTS.md` so installed users automatically get orchestrator-first routing behavior
+- A `doctor` command that explains whether the bundle is installed correctly and why a current conversation may still not see the skill
 
 ## Included Agents
 
@@ -75,6 +76,19 @@ And these skills:
 bin/codex-agents update
 ```
 
+## Doctor
+
+```bash
+bin/codex-agents doctor
+```
+
+Use `doctor` to check:
+
+- whether bundled agents were installed
+- whether `orchestrator-routing` is installed in `~/.codex/skills/`
+- whether the managed `AGENTS.md` block is present and up to date
+- whether the most likely issue is simply that the current conversation needs a fresh skill index
+
 ## List Bundled Files
 
 ```bash
@@ -114,6 +128,7 @@ Typical routes:
 
 - `install` is for first-time setup into `~/.codex`
 - `update` overwrites installed agent files, skills, and the managed entrypoint block with the current repo version
+- `doctor` checks installed state and explains common “installed but not visible in current conversation” situations
 - `list` shows the bundled agents and skills before install or update
 
 ## Publishing / Sharing
