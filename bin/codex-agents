@@ -12,16 +12,19 @@ TARGET_SKILLS_DIR=""
 TARGET_AGENTS_RULES_FILE=""
 ENTRYPOINT_BEGIN="<!-- BEGIN CODEX-AGENTS MANAGED ENTRYPOINT -->"
 ENTRYPOINT_END="<!-- END CODEX-AGENTS MANAGED ENTRYPOINT -->"
+JSON_OUTPUT=0
+REMAINING_ARGS=()
 
 usage() {
   cat <<'EOF'
 Usage:
   codex-agents install [--target PATH]   Copy bundled agents and skills into PATH (default: ~/.codex)
   codex-agents update [--target PATH]    Overwrite installed agents and skills from the current repo
-  codex-agents status [--target PATH]    Show a lightweight installed-state summary
-  codex-agents doctor [--target PATH]    Check installed agents, skills, and managed entrypoint state
+  codex-agents status [--target PATH] [--json]    Show a lightweight installed-state summary
+  codex-agents doctor [--target PATH] [--json]    Check installed agents, skills, and managed entrypoint state
   codex-agents uninstall [--target PATH] Remove bundled agents, orchestrator-routing skill, and the managed entrypoint block
   codex-agents list                      List bundled agent files and skills
+  codex-agents version                   Print the current bundled version identifier
 EOF
 }
 
@@ -32,6 +35,7 @@ set_target_paths() {
 }
 
 parse_target_flag() {
+  REMAINING_ARGS=()
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --target)
@@ -42,10 +46,13 @@ parse_target_flag() {
         TARGET_CODEX_DIR="$2"
         shift 2
         ;;
+      --json)
+        JSON_OUTPUT=1
+        shift
+        ;;
       *)
-        echo "Unknown argument: $1" >&2
-        usage
-        exit 1
+        REMAINING_ARGS+=("$1")
+        shift
         ;;
     esac
   done
@@ -78,17 +85,23 @@ check_path_exists() {
   local path="$2"
 
   if [[ -e "${path}" ]]; then
-    printf "OK    %s: %s\n" "${label}" "${path}"
+    if (( JSON_OUTPUT == 0 )); then
+      printf "OK    %s: %s\n" "${label}" "${path}"
+    fi
     return 0
   fi
 
-  printf "FAIL  %s: missing %s\n" "${label}" "${path}"
+  if (( JSON_OUTPUT == 0 )); then
+    printf "FAIL  %s: missing %s\n" "${label}" "${path}"
+  fi
   return 1
 }
 
 check_managed_entrypoint() {
   if [[ ! -f "${TARGET_AGENTS_RULES_FILE}" ]]; then
-    printf "FAIL  managed entrypoint: missing %s\n" "${TARGET_AGENTS_RULES_FILE}"
+    if (( JSON_OUTPUT == 0 )); then
+      printf "FAIL  managed entrypoint: missing %s\n" "${TARGET_AGENTS_RULES_FILE}"
+    fi
     return 1
   fi
 
@@ -97,15 +110,21 @@ check_managed_entrypoint() {
 
   if [[ "${contents}" == *"${ENTRYPOINT_BEGIN}"* && "${contents}" == *"${ENTRYPOINT_END}"* ]]; then
     if [[ "${contents}" == *"orchestrator-routing"* ]]; then
-      printf "OK    managed entrypoint: orchestrator-routing block present\n"
+      if (( JSON_OUTPUT == 0 )); then
+        printf "OK    managed entrypoint: orchestrator-routing block present\n"
+      fi
       return 0
     fi
 
-    printf "WARN  managed entrypoint: managed block present but missing orchestrator-routing language\n"
+    if (( JSON_OUTPUT == 0 )); then
+      printf "WARN  managed entrypoint: managed block present but missing orchestrator-routing language\n"
+    fi
     return 0
   fi
 
-  printf "FAIL  managed entrypoint: managed block missing from %s\n" "${TARGET_AGENTS_RULES_FILE}"
+  if (( JSON_OUTPUT == 0 )); then
+    printf "FAIL  managed entrypoint: managed block missing from %s\n" "${TARGET_AGENTS_RULES_FILE}"
+  fi
   return 1
 }
 
@@ -114,64 +133,138 @@ doctor() {
   local warnings=0
   local installed_agents=0
   local installed_skills=0
+  local agents_dir_present=false
+  local skills_dir_present=false
+  local orchestrator_agent_present=false
+  local orchestrator_skill_present=false
+  local managed_entrypoint_present=false
+  local findings=()
+  local next_actions=()
 
-  echo "Checks"
-  echo "------"
+  [[ -d "${TARGET_AGENTS_DIR}" ]] && agents_dir_present=true
+  [[ -d "${TARGET_SKILLS_DIR}" ]] && skills_dir_present=true
+  [[ -f "${TARGET_AGENTS_DIR}/orchestrator.md" ]] && orchestrator_agent_present=true
+  [[ -f "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md" ]] && orchestrator_skill_present=true
 
-  check_path_exists "agents dir" "${TARGET_AGENTS_DIR}" || failures=$((failures + 1))
-  check_path_exists "skills dir" "${TARGET_SKILLS_DIR}" || failures=$((failures + 1))
-  check_path_exists "orchestrator agent" "${TARGET_AGENTS_DIR}/orchestrator.md" || failures=$((failures + 1))
-  check_path_exists "orchestrator-routing skill" "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md" || failures=$((failures + 1))
+  if (( JSON_OUTPUT == 0 )); then
+    echo "Checks"
+    echo "------"
+  fi
 
-  if ! check_managed_entrypoint; then
+  if ! check_path_exists "agents dir" "${TARGET_AGENTS_DIR}"; then
+    failures=$((failures + 1))
+  fi
+  if ! check_path_exists "skills dir" "${TARGET_SKILLS_DIR}"; then
+    failures=$((failures + 1))
+  fi
+  if ! check_path_exists "orchestrator agent" "${TARGET_AGENTS_DIR}/orchestrator.md"; then
+    failures=$((failures + 1))
+  fi
+  if ! check_path_exists "orchestrator-routing skill" "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md"; then
+    failures=$((failures + 1))
+  fi
+
+  if check_managed_entrypoint; then
+    managed_entrypoint_present=true
+  else
     failures=$((failures + 1))
   fi
 
   if [[ -d "${TARGET_AGENTS_DIR}" ]]; then
     installed_agents="$(find "${TARGET_AGENTS_DIR}" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
-    printf "OK    installed agents count: %s\n" "${installed_agents}"
+    if (( JSON_OUTPUT == 0 )); then
+      printf "OK    installed agents count: %s\n" "${installed_agents}"
+    fi
   fi
 
   if [[ -d "${TARGET_SKILLS_DIR}" ]]; then
     installed_skills="$(find "${TARGET_SKILLS_DIR}" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
-    printf "OK    installed skills count: %s\n" "${installed_skills}"
+    if (( JSON_OUTPUT == 0 )); then
+      printf "OK    installed skills count: %s\n" "${installed_skills}"
+    fi
   fi
 
-  echo
-  echo "Findings"
-  echo "--------"
-
   if (( failures == 0 )); then
-    echo "- Installation looks healthy."
+    findings+=("Installation looks healthy.")
   else
-    echo "- Found ${failures} failing check(s)."
+    findings+=("Found ${failures} failing check(s).")
   fi
 
   if [[ -f "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md" ]]; then
-    echo "- The orchestrator-routing skill is installed on disk."
-    echo "- If a current Codex conversation still says the skill is unavailable, the most likely cause is a stale session skill index."
+    findings+=("The orchestrator-routing skill is installed on disk.")
+    findings+=("If a current Codex conversation still says the skill is unavailable, the most likely cause is a stale session skill index.")
     warnings=$((warnings + 1))
   fi
 
   if [[ -f "${TARGET_AGENTS_RULES_FILE}" ]]; then
-    echo "- The managed AGENTS block only sets the default routing preference; it does not force an already-open conversation to refresh its skill list."
+    findings+=("The managed AGENTS block only sets the default routing preference; it does not force an already-open conversation to refresh its skill list.")
   fi
 
-  echo
-  echo "Next actions"
-  echo "------------"
-
   if (( failures > 0 )); then
-    echo "- Run \`bin/codex-agents install\` to (re)install the bundle."
+    next_actions+=('Run `bin/codex-agents install` to (re)install the bundle.')
   fi
 
   if [[ -f "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md" ]]; then
-    echo "- Open a new Codex conversation after install/update so the new skill list is picked up."
-    echo "- If a fresh conversation still cannot see the skill, restart the Codex app and run \`bin/codex-agents doctor\` again."
+    next_actions+=('Open a new Codex conversation after install/update so the new skill list is picked up.')
+    next_actions+=('If a fresh conversation still cannot see the skill, restart the Codex app and run `bin/codex-agents doctor` again.')
   fi
 
   if (( failures == 0 )); then
-    echo "- You can test routing with: 用 orchestrator-routing skill。开发一个实时监控 Codex 配额用量的功能页面。"
+    next_actions+=('You can test routing with: 用 orchestrator-routing skill。开发一个实时监控 Codex 配额用量的功能页面。')
+  fi
+
+  if (( JSON_OUTPUT == 1 )); then
+    python3 - <<'PY' \
+      "${TARGET_CODEX_DIR}" \
+      "${TARGET_AGENTS_DIR}" \
+      "${TARGET_SKILLS_DIR}" \
+      "${TARGET_AGENTS_RULES_FILE}" \
+      "${agents_dir_present}" \
+      "${skills_dir_present}" \
+      "${orchestrator_agent_present}" \
+      "${orchestrator_skill_present}" \
+      "${managed_entrypoint_present}" \
+      "${installed_agents}" \
+      "${installed_skills}" \
+      "${failures}" \
+      "${warnings}" \
+      "$(printf '%s\n' "${findings[@]}")" \
+      "$(printf '%s\n' "${next_actions[@]}")"
+import json, sys
+codex_home, agents_dir, skills_dir, rules_file, agents_present, skills_present, orchestrator_agent_present, orchestrator_skill_present, managed_present, installed_agents, installed_skills, failures, warnings, findings_blob, next_actions_blob = sys.argv[1:]
+def lines(blob):
+    return [line for line in blob.splitlines() if line]
+payload = {
+    "codex_home": codex_home,
+    "checks": {
+        "agents_dir": {"path": agents_dir, "present": agents_present == "true"},
+        "skills_dir": {"path": skills_dir, "present": skills_present == "true"},
+        "orchestrator_agent": {"path": f"{agents_dir}/orchestrator.md", "present": orchestrator_agent_present == "true"},
+        "orchestrator_routing_skill": {"path": f"{skills_dir}/orchestrator-routing/SKILL.md", "present": orchestrator_skill_present == "true"},
+        "managed_entrypoint": {"path": rules_file, "present": managed_present == "true"},
+    },
+    "installed_agents_count": int(installed_agents),
+    "installed_skills_count": int(installed_skills),
+    "failures": int(failures),
+    "warnings": int(warnings),
+    "findings": lines(findings_blob),
+    "next_actions": lines(next_actions_blob),
+}
+print(json.dumps(payload, indent=2, ensure_ascii=False))
+PY
+  else
+    echo
+    echo "Findings"
+    echo "--------"
+    for finding in "${findings[@]}"; do
+      echo "- ${finding}"
+    done
+    echo
+    echo "Next actions"
+    echo "------------"
+    for action in "${next_actions[@]}"; do
+      echo "- ${action}"
+    done
   fi
 
   if (( warnings > 0 )); then
@@ -209,12 +302,36 @@ status_summary() {
     fi
   fi
 
-  echo "codex-agents status"
-  echo "agents_dir=${agents_state}"
-  echo "agents_count=${agent_count}"
-  echo "orchestrator_routing_skill=${skill_state}"
-  echo "managed_entrypoint=${managed_state}"
-  echo "skills_count=${skill_count}"
+  if (( JSON_OUTPUT == 1 )); then
+    python3 - <<'PY' "${TARGET_CODEX_DIR}" "${agents_state}" "${agent_count}" "${skill_state}" "${managed_state}" "${skill_count}"
+import json, sys
+codex_home, agents_state, agent_count, skill_state, managed_state, skill_count = sys.argv[1:]
+payload = {
+    "codex_home": codex_home,
+    "agents_dir": agents_state,
+    "agents_count": int(agent_count),
+    "orchestrator_routing_skill": skill_state,
+    "managed_entrypoint": managed_state,
+    "skills_count": int(skill_count),
+}
+print(json.dumps(payload, indent=2, ensure_ascii=False))
+PY
+  else
+    echo "codex-agents status"
+    echo "agents_dir=${agents_state}"
+    echo "agents_count=${agent_count}"
+    echo "orchestrator_routing_skill=${skill_state}"
+    echo "managed_entrypoint=${managed_state}"
+    echo "skills_count=${skill_count}"
+  fi
+}
+
+version_info() {
+  if git -C "${REPO_ROOT}" rev-parse --short HEAD >/dev/null 2>&1; then
+    git -C "${REPO_ROOT}" rev-parse --short HEAD
+  else
+    echo "unknown"
+  fi
 }
 
 managed_entrypoint_block() {
@@ -332,22 +449,60 @@ uninstall_bundle() {
 COMMAND="${1:-}"
 shift || true
 parse_target_flag "$@"
+if ((${#REMAINING_ARGS[@]})); then
+  set -- "${REMAINING_ARGS[@]}"
+else
+  set --
+fi
 
 case "${COMMAND}" in
   install)
+    if [[ $# -gt 0 ]]; then
+      echo "install does not accept extra arguments" >&2
+      usage
+      exit 1
+    fi
     install_agents
     ;;
   update)
+    if [[ $# -gt 0 ]]; then
+      echo "update does not accept extra arguments" >&2
+      usage
+      exit 1
+    fi
     update_agents
     ;;
   doctor)
+    if [[ $# -gt 0 ]]; then
+      echo "doctor does not accept extra arguments" >&2
+      usage
+      exit 1
+    fi
     doctor
     ;;
   status)
+    if [[ $# -gt 0 ]]; then
+      echo "status does not accept extra arguments" >&2
+      usage
+      exit 1
+    fi
     status_summary
     ;;
   uninstall)
+    if [[ $# -gt 0 ]]; then
+      echo "uninstall does not accept extra arguments" >&2
+      usage
+      exit 1
+    fi
     uninstall_bundle
+    ;;
+  version)
+    if [[ $# -gt 0 ]]; then
+      echo "version does not accept extra arguments" >&2
+      usage
+      exit 1
+    fi
+    version_info
     ;;
   list)
     if [[ $# -gt 0 ]]; then

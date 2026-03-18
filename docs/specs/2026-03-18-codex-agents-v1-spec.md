@@ -51,6 +51,7 @@ That makes role-driven delegation harder to adopt consistently, harder to share,
   - `doctor`
   - `uninstall`
   - `list`
+  - `version`
 - installation targets:
   - `~/.codex/agents/`
   - `~/.codex/skills/`
@@ -141,6 +142,7 @@ codex-agents/
   - `Findings`
   - `Next actions`
 - explain the common case where the skill is installed on disk but an already-open conversation still has a stale skill list
+- allow `--json` so diagnostics can be consumed by scripts or other tools
 
 ### `status`
 
@@ -149,6 +151,7 @@ codex-agents/
 - report whether the managed entrypoint block is present
 - provide a lightweight summary without the longer diagnostic guidance from `doctor`
 - allow `--target <path>` so status can check a custom Codex home root
+- allow `--json` so summary output can be consumed programmatically
 
 ### `uninstall`
 
@@ -157,6 +160,11 @@ codex-agents/
 - remove the managed `~/.codex/AGENTS.md` block
 - leave unrelated global skills and unrelated `AGENTS.md` content intact
 - allow `--target <path>` so uninstall affects a custom Codex home root instead of `~/.codex`
+
+### `version`
+
+- print the current repo short SHA as the bundled version identifier
+- provide a lightweight support/debug identifier until a fuller release model exists
 
 ## User Flows
 

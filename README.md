@@ -109,6 +109,12 @@ Use `doctor` to check:
 - whether the managed `AGENTS.md` block is present and up to date
 - whether the most likely issue is simply that the current conversation needs a fresh skill index
 
+Machine-readable output:
+
+```bash
+bin/codex-agents doctor --json
+```
+
 ## Status
 
 ```bash
@@ -126,6 +132,12 @@ Use `status` for a quick summary when you do not need the longer `doctor` guidan
 - the managed agents directory exists
 - `orchestrator-routing` is installed
 - the managed `AGENTS.md` block is present
+
+Machine-readable output:
+
+```bash
+bin/codex-agents status --json
+```
 
 ## Uninstall
 
@@ -146,6 +158,14 @@ bin/codex-agents uninstall --target /tmp/test-codex-home
 - the managed entrypoint block in `~/.codex/AGENTS.md`
 
 It does **not** remove unrelated global skills or unrelated content from `AGENTS.md`.
+
+## Version
+
+```bash
+bin/codex-agents version
+```
+
+`version` prints the current bundled git commit short SHA. This is intended as a lightweight support identifier until the repo grows a fuller release/versioning model.
 
 ## List Bundled Files
 
@@ -198,8 +218,11 @@ Typical routes:
 - `install` and `update` also accept `--target <path>` to install into a different Codex home root
 - `update` overwrites installed agent files, skills, and the managed entrypoint block with the current repo version
 - `status` gives a lightweight installed-state summary
+- `status --json` gives the same summary in machine-readable form
 - `uninstall` removes only the bundle managed by this repository
 - `doctor` checks installed state and explains common “installed but not visible in current conversation” situations
+- `doctor --json` returns the same diagnostic model in machine-readable form
+- `version` prints the current bundled git short SHA
 - `list` shows the bundled agents and skills before install or update
 
 ## Publishing / Sharing
