@@ -14,6 +14,7 @@ ENTRYPOINT_BEGIN="<!-- BEGIN CODEX-AGENTS MANAGED ENTRYPOINT -->"
 ENTRYPOINT_END="<!-- END CODEX-AGENTS MANAGED ENTRYPOINT -->"
 JSON_OUTPUT=0
 REMAINING_ARGS=()
+LINK_BIN_DIR="${HOME}/.local/bin"
 
 usage() {
   cat <<'EOF'
@@ -23,6 +24,8 @@ Usage:
   codex-agents status [--target PATH] [--json]    Show a lightweight installed-state summary
   codex-agents doctor [--target PATH] [--json]    Check installed agents, skills, and managed entrypoint state
   codex-agents uninstall [--target PATH] Remove bundled agents, orchestrator-routing skill, and the managed entrypoint block
+  codex-agents link [--bin-dir PATH]     Symlink this repo's CLI into PATH (default: ~/.local/bin)
+  codex-agents unlink [--bin-dir PATH]   Remove the symlink created by `link`
   codex-agents list                      List bundled agent files and skills
   codex-agents version                   Print the current bundled version identifier
 EOF
@@ -49,6 +52,14 @@ parse_target_flag() {
       --json)
         JSON_OUTPUT=1
         shift
+        ;;
+      --bin-dir)
+        [[ $# -ge 2 ]] || {
+          echo "Missing value for --bin-dir" >&2
+          exit 1
+        }
+        LINK_BIN_DIR="$2"
+        shift 2
         ;;
       *)
         REMAINING_ARGS+=("$1")
@@ -334,6 +345,30 @@ version_info() {
   fi
 }
 
+link_cli() {
+  local link_path="${LINK_BIN_DIR}/codex-agents"
+  mkdir -p "${LINK_BIN_DIR}"
+  ln -sfn "${REPO_ROOT}/bin/codex-agents" "${link_path}"
+  echo "Linked codex-agents to ${link_path}"
+}
+
+unlink_cli() {
+  local link_path="${LINK_BIN_DIR}/codex-agents"
+
+  if [[ -L "${link_path}" ]]; then
+    rm -f "${link_path}"
+    echo "Removed codex-agents link from ${link_path}"
+    return 0
+  fi
+
+  if [[ -e "${link_path}" ]]; then
+    echo "Refusing to remove non-symlink path: ${link_path}" >&2
+    exit 1
+  fi
+
+  echo "No codex-agents link found at ${link_path}"
+}
+
 managed_entrypoint_block() {
   cat <<EOF
 ${ENTRYPOINT_BEGIN}
@@ -495,6 +530,22 @@ case "${COMMAND}" in
       exit 1
     fi
     uninstall_bundle
+    ;;
+  link)
+    if [[ $# -gt 0 ]]; then
+      echo "link does not accept extra arguments" >&2
+      usage
+      exit 1
+    fi
+    link_cli
+    ;;
+  unlink)
+    if [[ $# -gt 0 ]]; then
+      echo "unlink does not accept extra arguments" >&2
+      usage
+      exit 1
+    fi
+    unlink_cli
     ;;
   version)
     if [[ $# -gt 0 ]]; then

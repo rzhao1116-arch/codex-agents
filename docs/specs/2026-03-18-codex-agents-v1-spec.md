@@ -50,6 +50,8 @@ That makes role-driven delegation harder to adopt consistently, harder to share,
   - `status`
   - `doctor`
   - `uninstall`
+  - `link`
+  - `unlink`
   - `list`
   - `version`
 - installation targets:
@@ -160,6 +162,17 @@ codex-agents/
 - remove the managed `~/.codex/AGENTS.md` block
 - leave unrelated global skills and unrelated `AGENTS.md` content intact
 - allow `--target <path>` so uninstall affects a custom Codex home root instead of `~/.codex`
+
+### `link`
+
+- create a symlink at `~/.local/bin/codex-agents` pointing to the repo's `bin/codex-agents`
+- allow `--bin-dir <path>` so tests or custom shells can use a different bin directory
+
+### `unlink`
+
+- remove the symlink previously created by `link`
+- refuse to delete a non-symlink path at the same location
+- allow `--bin-dir <path>` for custom bin directories
 
 ### `version`
 
