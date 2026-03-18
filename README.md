@@ -271,6 +271,8 @@ The next release-oriented milestones are:
 3. use the release tarball and checksum to draft a Homebrew formula
 
 The Homebrew preparation plan lives at [2026-03-18-homebrew-core-prep.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/plans/2026-03-18-homebrew-core-prep.md).
+The first release checklist lives at [2026-03-18-v0-1-0-release-checklist.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/plans/2026-03-18-v0-1-0-release-checklist.md).
+The draft release notes live at [v0.1.0.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.0.md).
 
 ## Publishing / Sharing
 
