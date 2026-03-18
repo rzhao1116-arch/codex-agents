@@ -6,23 +6,51 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SOURCE_AGENTS_DIR="${REPO_ROOT}/agents"
 SOURCE_SKILLS_DIR="${REPO_ROOT}/skills"
-TARGET_AGENTS_DIR="${HOME}/.codex/agents"
-TARGET_SKILLS_DIR="${HOME}/.codex/skills"
 TARGET_CODEX_DIR="${HOME}/.codex"
-TARGET_AGENTS_RULES_FILE="${TARGET_CODEX_DIR}/AGENTS.md"
+TARGET_AGENTS_DIR=""
+TARGET_SKILLS_DIR=""
+TARGET_AGENTS_RULES_FILE=""
 ENTRYPOINT_BEGIN="<!-- BEGIN CODEX-AGENTS MANAGED ENTRYPOINT -->"
 ENTRYPOINT_END="<!-- END CODEX-AGENTS MANAGED ENTRYPOINT -->"
 
 usage() {
   cat <<'EOF'
 Usage:
-  codex-agents install   Copy bundled agents and skills into ~/.codex
-  codex-agents update    Overwrite installed agents and skills from the current repo
-  codex-agents status    Show a lightweight installed-state summary
-  codex-agents doctor    Check installed agents, skills, and managed entrypoint state
-  codex-agents uninstall Remove bundled agents, orchestrator-routing skill, and the managed entrypoint block
-  codex-agents list      List bundled agent files and skills
+  codex-agents install [--target PATH]   Copy bundled agents and skills into PATH (default: ~/.codex)
+  codex-agents update [--target PATH]    Overwrite installed agents and skills from the current repo
+  codex-agents status [--target PATH]    Show a lightweight installed-state summary
+  codex-agents doctor [--target PATH]    Check installed agents, skills, and managed entrypoint state
+  codex-agents uninstall [--target PATH] Remove bundled agents, orchestrator-routing skill, and the managed entrypoint block
+  codex-agents list                      List bundled agent files and skills
 EOF
+}
+
+set_target_paths() {
+  TARGET_AGENTS_DIR="${TARGET_CODEX_DIR}/agents"
+  TARGET_SKILLS_DIR="${TARGET_CODEX_DIR}/skills"
+  TARGET_AGENTS_RULES_FILE="${TARGET_CODEX_DIR}/AGENTS.md"
+}
+
+parse_target_flag() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --target)
+        [[ $# -ge 2 ]] || {
+          echo "Missing value for --target" >&2
+          exit 1
+        }
+        TARGET_CODEX_DIR="$2"
+        shift 2
+        ;;
+      *)
+        echo "Unknown argument: $1" >&2
+        usage
+        exit 1
+        ;;
+    esac
+  done
+
+  set_target_paths
 }
 
 list_agents() {
@@ -301,7 +329,11 @@ uninstall_bundle() {
   list_bundle
 }
 
-case "${1:-}" in
+COMMAND="${1:-}"
+shift || true
+parse_target_flag "$@"
+
+case "${COMMAND}" in
   install)
     install_agents
     ;;
@@ -318,6 +350,11 @@ case "${1:-}" in
     uninstall_bundle
     ;;
   list)
+    if [[ $# -gt 0 ]]; then
+      echo "list does not accept extra arguments" >&2
+      usage
+      exit 1
+    fi
     list_bundle
     ;;
   *)

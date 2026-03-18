@@ -54,6 +54,7 @@ That makes role-driven delegation harder to adopt consistently, harder to share,
 - installation targets:
   - `~/.codex/agents/`
   - `~/.codex/skills/`
+- optional custom install target via `--target <path>` interpreted as a Codex home root
 - a tool-managed entrypoint block in:
   - `~/.codex/AGENTS.md`
 - automatic task classification inside `orchestrator-routing`:
@@ -115,6 +116,7 @@ codex-agents/
 - copy bundled skill directories into the target directory
 - create or update the managed `~/.codex/AGENTS.md` entrypoint block
 - print the installed role and skill list
+- allow `--target <path>` so install writes into `<path>/agents`, `<path>/skills`, and `<path>/AGENTS.md`
 
 ### `update`
 
@@ -122,6 +124,7 @@ codex-agents/
 - overwrite previously installed skills from the current repo contents
 - replace the managed `~/.codex/AGENTS.md` entrypoint block with the current repo version
 - print the bundled role and skill list
+- allow `--target <path>` so update applies to a custom Codex home root
 
 ### `list`
 
@@ -132,6 +135,7 @@ codex-agents/
 - check whether `~/.codex/agents/` exists
 - check whether `~/.codex/skills/orchestrator-routing/SKILL.md` exists
 - check whether the managed `~/.codex/AGENTS.md` block exists and mentions `orchestrator-routing`
+- allow `--target <path>` so diagnostics can run against a custom Codex home root
 - print three sections:
   - `Checks`
   - `Findings`
@@ -144,6 +148,7 @@ codex-agents/
 - report whether `orchestrator-routing` is installed
 - report whether the managed entrypoint block is present
 - provide a lightweight summary without the longer diagnostic guidance from `doctor`
+- allow `--target <path>` so status can check a custom Codex home root
 
 ### `uninstall`
 
@@ -151,6 +156,7 @@ codex-agents/
 - remove bundled skill directories previously installed by this repo
 - remove the managed `~/.codex/AGENTS.md` block
 - leave unrelated global skills and unrelated `AGENTS.md` content intact
+- allow `--target <path>` so uninstall affects a custom Codex home root instead of `~/.codex`
 
 ## User Flows
 
