@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SOURCE_AGENTS_DIR="${REPO_ROOT}/agents"
+TARGET_AGENTS_DIR="${HOME}/.codex/agents"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  codex-agents install   Copy bundled agent files into ~/.codex/agents
+  codex-agents update    Overwrite installed agent files from the current repo
+  codex-agents list      List bundled agent files
+EOF
+}
+
+list_agents() {
+  find "${SOURCE_AGENTS_DIR}" -maxdepth 1 -type f -name '*.md' -print \
+    | xargs -I{} basename "{}" \
+    | sort
+}
+
+install_agents() {
+  mkdir -p "${TARGET_AGENTS_DIR}"
+  cp "${SOURCE_AGENTS_DIR}"/*.md "${TARGET_AGENTS_DIR}/"
+  echo "Installed agents to ${TARGET_AGENTS_DIR}:"
+  list_agents
+}
+
+update_agents() {
+  install_agents
+}
+
+case "${1:-}" in
+  install)
+    install_agents
+    ;;
+  update)
+    update_agents
+    ;;
+  list)
+    list_agents
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac
