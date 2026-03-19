@@ -2,7 +2,7 @@
 
 Codex-native `.toml` agents plus an installed `orchestrator-routing` skill that makes `orchestrator` the default routing lens for non-trivial work.
 
-This repository is released under the MIT license. The latest published tag is `v0.1.1`.
+This repository is released under the MIT license. The current source-tree release target is `v0.1.2`.
 
 中文说明见 [README.zh-CN.md](README.zh-CN.md)。
 
@@ -245,19 +245,13 @@ Typical routes:
 - `version` prints the current bundled git short SHA
 - `list` shows the bundled agents and skills before install or update
 
-## Release Roadmap
+## Release Notes
 
-The next release-oriented milestones are:
+Published release notes:
 
-1. tag the first versioned release as `v0.1.0`
-2. publish a GitHub Release using that tag
-3. use the release tarball and checksum to draft a Homebrew formula
-
-The Homebrew preparation plan lives at [2026-03-18-homebrew-core-prep.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/plans/2026-03-18-homebrew-core-prep.md).
-The first release checklist lives at [2026-03-18-v0-1-0-release-checklist.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/plans/2026-03-18-v0-1-0-release-checklist.md).
-The current release notes drafts live at [v0.1.0.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.0.md) and [v0.1.1.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.1.md).
-The current Homebrew formula draft lives at [codex-agents.rb](/Users/ryan/Projects/Ai/other/codex-agents/Formula/codex-agents.rb).
-The current `homebrew-core` submission draft lives at [2026-03-18-homebrew-core-submission-draft.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/plans/2026-03-18-homebrew-core-submission-draft.md).
+- [v0.1.0](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.0.md)
+- [v0.1.1](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.1.md)
+- [v0.1.2](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.2.md)
 
 ## Homebrew Draft
 
@@ -267,7 +261,7 @@ The repository now includes a Homebrew formula draft aimed at a future `homebrew
 bash tests/homebrew_formula_temp_tap_roundtrip.sh
 ```
 
-The draft currently uses the published `v0.1.0` release tarball and checksum. It installs the bundled repository layout into Homebrew `libexec` and exposes the CLI with `bin.write_exec_script`.
+The draft currently uses the latest tagged release tarball and checksum. It installs the bundled repository layout into Homebrew `libexec` and exposes the CLI with `bin.write_exec_script`.
 
 Because the formula tracks the latest tagged release tarball, source-tree changes to agent layout should be released and re-tagged before expecting the Homebrew draft to reflect them.
 
@@ -307,6 +301,6 @@ If you do not want to link the repo-local CLI into `PATH`, you can keep using `b
 - The first version does manage a clearly marked entrypoint block in `~/.codex/AGENTS.md` because current Codex behavior does not expose a built-in default-agent hook through `agents/` alone.
 - The first version also installs an explicit `orchestrator-routing` skill so the routing behavior participates in skill-first workflows instead of losing priority to existing skills.
 - The main feature is the default-entrypoint behavior of `orchestrator-routing` plus `orchestrator`, not just the presence of many role files.
-- Starting with the pending `v0.1.1` release line, the agent bundle is authored directly as `.toml`, so install/update no longer converts or depends on Markdown agent baselines at runtime.
+- Starting with `v0.1.1`, the agent bundle is authored directly as `.toml`, so install/update no longer converts or depends on Markdown agent baselines at runtime.
 - The first version aims for automatic chain pruning and automatic continuation through the smallest useful role sequence.
 - The first version still does not promise perfect routing, hidden Codex hooks, or a flawless autonomous execution engine.
