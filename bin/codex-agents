@@ -25,7 +25,7 @@ LINK_BIN_DIR="${HOME}/.local/bin"
 usage() {
   cat <<'EOF'
 Usage:
-  codex-agents install [--target PATH]   Copy bundled agents and skills into PATH (default: ~/.codex)
+  codex-agents install [--target PATH]   Copy bundled Codex .toml agents and skills into PATH (default: ~/.codex)
   codex-agents update [--target PATH]    Overwrite installed agents and skills from the current repo
   codex-agents status [--target PATH] [--json]    Show a lightweight installed-state summary
   codex-agents doctor [--target PATH] [--json]    Check installed agents, skills, and managed entrypoint state
@@ -78,7 +78,7 @@ parse_target_flag() {
 }
 
 list_agents() {
-  find "${SOURCE_AGENTS_DIR}" -maxdepth 1 -type f -name '*.md' -print \
+  find "${SOURCE_AGENTS_DIR}" -maxdepth 1 -type f -name '*.toml' -print \
     | xargs -I{} basename "{}" \
     | sort
 }
@@ -160,7 +160,7 @@ doctor() {
 
   [[ -d "${TARGET_AGENTS_DIR}" ]] && agents_dir_present=true
   [[ -d "${TARGET_SKILLS_DIR}" ]] && skills_dir_present=true
-  [[ -f "${TARGET_AGENTS_DIR}/orchestrator.md" ]] && orchestrator_agent_present=true
+  [[ -f "${TARGET_AGENTS_DIR}/orchestrator.toml" ]] && orchestrator_agent_present=true
   [[ -f "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md" ]] && orchestrator_skill_present=true
 
   if (( JSON_OUTPUT == 0 )); then
@@ -174,7 +174,7 @@ doctor() {
   if ! check_path_exists "skills dir" "${TARGET_SKILLS_DIR}"; then
     failures=$((failures + 1))
   fi
-  if ! check_path_exists "orchestrator agent" "${TARGET_AGENTS_DIR}/orchestrator.md"; then
+  if ! check_path_exists "orchestrator agent" "${TARGET_AGENTS_DIR}/orchestrator.toml"; then
     failures=$((failures + 1))
   fi
   if ! check_path_exists "orchestrator-routing skill" "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md"; then
@@ -188,7 +188,7 @@ doctor() {
   fi
 
   if [[ -d "${TARGET_AGENTS_DIR}" ]]; then
-    installed_agents="$(find "${TARGET_AGENTS_DIR}" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
+    installed_agents="$(find "${TARGET_AGENTS_DIR}" -maxdepth 1 -type f -name '*.toml' | wc -l | tr -d ' ')"
     if (( JSON_OUTPUT == 0 )); then
       printf "OK    installed agents count: %s\n" "${installed_agents}"
     fi
@@ -256,7 +256,7 @@ payload = {
     "checks": {
         "agents_dir": {"path": agents_dir, "present": agents_present == "true"},
         "skills_dir": {"path": skills_dir, "present": skills_present == "true"},
-        "orchestrator_agent": {"path": f"{agents_dir}/orchestrator.md", "present": orchestrator_agent_present == "true"},
+        "orchestrator_agent": {"path": f"{agents_dir}/orchestrator.toml", "present": orchestrator_agent_present == "true"},
         "orchestrator_routing_skill": {"path": f"{skills_dir}/orchestrator-routing/SKILL.md", "present": orchestrator_skill_present == "true"},
         "managed_entrypoint": {"path": rules_file, "present": managed_present == "true"},
     },
@@ -300,7 +300,7 @@ status_summary() {
 
   if [[ -d "${TARGET_AGENTS_DIR}" ]]; then
     agents_state="present"
-    agent_count="$(find "${TARGET_AGENTS_DIR}" -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')"
+    agent_count="$(find "${TARGET_AGENTS_DIR}" -maxdepth 1 -type f -name '*.toml' | wc -l | tr -d ' ')"
   fi
 
   if [[ -f "${TARGET_SKILLS_DIR}/orchestrator-routing/SKILL.md" ]]; then
@@ -384,7 +384,7 @@ ${ENTRYPOINT_BEGIN}
 - Let \`orchestrator-routing\` classify the task as \`simple\`, \`multi-step\`, or \`complex\`.
 - Let \`orchestrator-routing\` prune the smallest useful role chain instead of defaulting to the full role set.
 - Let \`orchestrator-routing\` decide whether downstream work should enter skills such as \`brainstorming\`, \`writing-plans\`, or implementation-focused skills.
-- Keep \`orchestrator.md\` as the baseline role definition that the routing skill can align to and reference.
+- Keep \`orchestrator.toml\` as the baseline role definition that the routing skill can align to and reference.
 - Stronger local project rules and repository-specific rules still override this managed baseline.
 ${ENTRYPOINT_END}
 EOF
@@ -449,7 +449,7 @@ install_skills() {
 
 install_agents() {
   mkdir -p "${TARGET_AGENTS_DIR}"
-  cp "${SOURCE_AGENTS_DIR}"/*.md "${TARGET_AGENTS_DIR}/"
+  cp "${SOURCE_AGENTS_DIR}"/*.toml "${TARGET_AGENTS_DIR}/"
   install_skills
   upsert_managed_entrypoint
   echo "Installed bundle into ${TARGET_CODEX_DIR}:"
@@ -466,12 +466,12 @@ update_agents() {
 
 uninstall_bundle() {
   local agent_file
-  for agent_file in "${SOURCE_AGENTS_DIR}"/*.md; do
+  for agent_file in "${SOURCE_AGENTS_DIR}"/*.toml; do
     [[ -f "${agent_file}" ]] || continue
     rm -f "${TARGET_AGENTS_DIR}/$(basename "${agent_file}")"
   done
 
-  if [[ -d "${TARGET_AGENTS_DIR}" ]] && [[ -z "$(find "${TARGET_AGENTS_DIR}" -maxdepth 1 -type f -name '*.md' -print -quit)" ]]; then
+  if [[ -d "${TARGET_AGENTS_DIR}" ]] && [[ -z "$(find "${TARGET_AGENTS_DIR}" -maxdepth 1 -type f -name '*.toml' -print -quit)" ]]; then
     rmdir "${TARGET_AGENTS_DIR}" 2>/dev/null || true
   fi
 

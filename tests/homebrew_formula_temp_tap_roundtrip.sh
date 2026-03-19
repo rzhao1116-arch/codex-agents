@@ -13,9 +13,11 @@ cleanup() {
 }
 trap cleanup EXIT
 
+brew uninstall --force codex-agents >/dev/null 2>&1 || true
+
 brew tap-new --no-git "$TAP_NAME" >/dev/null
 mkdir -p "$TAP_DIR/Formula"
 cp "$ROOT_DIR/Formula/codex-agents.rb" "$TAP_DIR/Formula/codex-agents.rb"
 
 brew install --build-from-source "$TAP_NAME/codex-agents"
-brew test codex-agents
+brew test "$TAP_NAME/codex-agents"

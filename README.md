@@ -1,8 +1,10 @@
 # codex-agents
 
-Claude-style Codex agents plus an installed orchestrator-routing skill that makes `orchestrator` the default routing lens for non-trivial work.
+Codex-native `.toml` agents plus an installed `orchestrator-routing` skill that makes `orchestrator` the default routing lens for non-trivial work.
 
-This repository is released under the MIT license and is currently targeting `v0.1.0` as the first versioned public release milestone.
+This repository is released under the MIT license. The latest published tag is `v0.1.1`.
+
+中文说明见 [README.zh-CN.md](/Users/ryan/Projects/Ai/other/codex-agents/README.zh-CN.md)。
 
 ## Command Usage Model
 
@@ -12,8 +14,8 @@ This repository is released under the MIT license and is currently targeting `v0
 
 ## What This Repo Provides
 
-- A set of Codex agent baseline files in [`agents/`](/Users/ryan/Projects/Ai/other/codex-agents/agents)
-- A baseline orchestration role in [`agents/orchestrator.md`](/Users/ryan/Projects/Ai/other/codex-agents/agents/orchestrator.md)
+- A set of Codex-native agent baseline files in [`agents/`](/Users/ryan/Projects/Ai/other/codex-agents/agents)
+- A baseline orchestration role in [`orchestrator.toml`](/Users/ryan/Projects/Ai/other/codex-agents/agents/orchestrator.toml)
 - An installable routing skill in [`skills/orchestrator-routing/SKILL.md`](/Users/ryan/Projects/Ai/other/codex-agents/skills/orchestrator-routing/SKILL.md)
 - A simple installer CLI in [`bin/codex-agents`](/Users/ryan/Projects/Ai/other/codex-agents/bin/codex-agents)
 - A tool-managed entrypoint block in `~/.codex/AGENTS.md` so installed users automatically get orchestrator-first routing behavior
@@ -68,17 +70,17 @@ That block tells Codex to prefer the installed `orchestrator-routing` skill for 
 
 The first install creates these agent files:
 
-- `orchestrator.md`
-- `product-manager.md`
-- `ux-architect.md`
-- `ui-designer.md`
-- `frontend-developer.md`
-- `backend-architect.md`
-- `software-architect.md`
-- `docs-researcher.md`
-- `code-reviewer.md`
-- `reality-checker.md`
-- `technical-writer.md`
+- `orchestrator.toml`
+- `product-manager.toml`
+- `ux-architect.toml`
+- `ui-designer.toml`
+- `frontend-developer.toml`
+- `backend-architect.toml`
+- `software-architect.toml`
+- `docs-researcher.toml`
+- `code-reviewer.toml`
+- `reality-checker.toml`
+- `technical-writer.toml`
 
 And these skills:
 
@@ -189,6 +191,8 @@ codex-agents version
 codex-agents list
 ```
 
+Each bundled agent is a Codex-native `.toml` file with explicit model, reasoning, sandbox, and `developer_instructions` fields rather than a Claude-style Markdown persona file.
+
 ## How To Use
 
 - Treat the installed files as a lightweight role-and-routing system for Codex.
@@ -201,7 +205,7 @@ codex-agents list
   - `next-step`
   - `reason`
 - Let `orchestrator-routing` decide whether the next phase should enter `brainstorming`, `writing-plans`, implementation skills, or stop early.
-- Keep `orchestrator.md` as the baseline role definition behind that routing behavior.
+- Keep `orchestrator.toml` as the baseline role definition behind that routing behavior.
 - Keep stronger local global rules and repository-local rules above these generic baselines.
 
 ## Practical Usage Pattern
@@ -251,7 +255,7 @@ The next release-oriented milestones are:
 
 The Homebrew preparation plan lives at [2026-03-18-homebrew-core-prep.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/plans/2026-03-18-homebrew-core-prep.md).
 The first release checklist lives at [2026-03-18-v0-1-0-release-checklist.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/plans/2026-03-18-v0-1-0-release-checklist.md).
-The draft release notes live at [v0.1.0.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.0.md).
+The current release notes drafts live at [v0.1.0.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.0.md) and [v0.1.1.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.1.md).
 The current Homebrew formula draft lives at [codex-agents.rb](/Users/ryan/Projects/Ai/other/codex-agents/Formula/codex-agents.rb).
 The current `homebrew-core` submission draft lives at [2026-03-18-homebrew-core-submission-draft.md](/Users/ryan/Projects/Ai/other/codex-agents/docs/plans/2026-03-18-homebrew-core-submission-draft.md).
 
@@ -263,7 +267,9 @@ The repository now includes a Homebrew formula draft aimed at a future `homebrew
 bash tests/homebrew_formula_temp_tap_roundtrip.sh
 ```
 
-The draft currently uses the `v0.1.0` release tarball and checksum. It installs the bundled repository layout into Homebrew `libexec` and exposes the CLI with `bin.write_exec_script`.
+The draft currently uses the published `v0.1.0` release tarball and checksum. It installs the bundled repository layout into Homebrew `libexec` and exposes the CLI with `bin.write_exec_script`.
+
+Because the formula tracks the latest tagged release tarball, source-tree changes to agent layout should be released and re-tagged before expecting the Homebrew draft to reflect them.
 
 Current Homebrew releases reject non-tap local formula installs, so this repo validates the draft by copying it into a temporary tap, installing from that tap, running `brew test`, and cleaning up afterwards.
 
@@ -296,10 +302,11 @@ If you do not want to link the repo-local CLI into `PATH`, you can keep using `b
 
 ## Design Notes
 
-- This repo intentionally installs directly into `~/.codex/agents/` and `~/.codex/skills/`, similar to the way Claude-style agent directories are commonly organized.
+- This repo intentionally installs directly into `~/.codex/agents/` and `~/.codex/skills/`, following Codex's custom-agent directory model.
 - The first version does not modify user `config.toml`.
 - The first version does manage a clearly marked entrypoint block in `~/.codex/AGENTS.md` because current Codex behavior does not expose a built-in default-agent hook through `agents/` alone.
 - The first version also installs an explicit `orchestrator-routing` skill so the routing behavior participates in skill-first workflows instead of losing priority to existing skills.
 - The main feature is the default-entrypoint behavior of `orchestrator-routing` plus `orchestrator`, not just the presence of many role files.
+- Starting with the pending `v0.1.1` release line, the agent bundle is authored directly as `.toml`, so install/update no longer converts or depends on Markdown agent baselines at runtime.
 - The first version aims for automatic chain pruning and automatic continuation through the smallest useful role sequence.
 - The first version still does not promise perfect routing, hidden Codex hooks, or a flawless autonomous execution engine.

@@ -6,21 +6,21 @@ Prototype already implemented; this spec defines the intended v1 scope, boundari
 
 ## Product Goal
 
-Provide a simple public CLI tool that installs a Claude-style set of role baselines plus an `orchestrator-routing` skill into `~/.codex`, so Codex users can adopt a role-driven workflow where routing participates in skill-first behavior instead of relying only on passive agent docs.
+Provide a simple public CLI tool that installs a Codex-native set of `.toml` role baselines plus an `orchestrator-routing` skill into `~/.codex`, so Codex users can adopt a role-driven workflow where routing participates in skill-first behavior instead of relying only on passive agent docs.
 
 ## Problem
 
 Codex supports subagents, but users do not get:
 
 - a ready-made role set
-- a clear Claude-style `agents/` installation workflow
+- a clear shared `agents/` installation workflow
 - a skill-level orchestration entrypoint that can compete with existing skill-first workflows
 
 That makes role-driven delegation harder to adopt consistently, harder to share, and too dependent on users manually remembering how to route tasks.
 
 ## Target User
 
-- Codex users who want a Claude-style `agents/` directory
+- Codex users who want a reusable custom-agent directory
 - users who want a reusable role baseline without building their own role library from scratch
 - users who prefer simple install/update mechanics over framework setup
 - users who want orchestration to participate in skill-first routing instead of acting as a passive reference document
@@ -31,7 +31,7 @@ That makes role-driven delegation harder to adopt consistently, harder to share,
 
 - a repository-local `agents/` directory with bundled role files
 - a repository-local `skills/` directory with bundled skill files
-- a bundled `orchestrator.md` that acts as the baseline orchestration role definition
+- a bundled `orchestrator.toml` that acts as the baseline orchestration role definition
 - a bundled `orchestrator-routing` skill that acts as the default orchestration entrypoint
 - bundled specialist role files:
   - `product-manager`
@@ -108,7 +108,7 @@ codex-agents/
 - `orchestrator-routing` is the default entrypoint for complex or ambiguous work
 - `orchestrator-routing` first classifies task complexity, then prunes the smallest necessary role chain, then chooses downstream skills and roles toward a final result
 - `orchestrator-routing` makes that routing visible with a short output block before deeper guidance continues
-- `orchestrator.md` remains the baseline orchestration role definition that the routing skill aligns to and references
+- `orchestrator.toml` remains the baseline orchestration role definition that the routing skill aligns to and references
 - local user rules and project rules remain stronger than the bundled baselines
 
 ## CLI Behavior
@@ -117,7 +117,7 @@ codex-agents/
 
 - create `~/.codex/agents/` if missing
 - create `~/.codex/skills/` if missing
-- copy all bundled agent `.md` files into the target directory
+- copy all bundled agent `.toml` files into the target directory
 - copy bundled skill directories into the target directory
 - create or update the managed `~/.codex/AGENTS.md` entrypoint block
 - print the installed role and skill list

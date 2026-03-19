@@ -12,7 +12,7 @@ trap cleanup EXIT
 
 "$ROOT_DIR/bin/codex-agents" install --target "$TARGET_DIR" >/tmp/codex-agents-target-install.out
 
-test -f "$TARGET_DIR/agents/orchestrator.md"
+test -f "$TARGET_DIR/agents/orchestrator.toml"
 test -f "$TARGET_DIR/skills/orchestrator-routing/SKILL.md"
 grep -q 'BEGIN CODEX-AGENTS MANAGED ENTRYPOINT' "$TARGET_DIR/AGENTS.md"
 
@@ -23,7 +23,7 @@ echo "$STATUS_OUTPUT" | grep -q 'managed_entrypoint=present'
 
 "$ROOT_DIR/bin/codex-agents" uninstall --target "$TARGET_DIR" >/tmp/codex-agents-target-uninstall.out
 
-test ! -e "$TARGET_DIR/agents/orchestrator.md"
+test ! -e "$TARGET_DIR/agents/orchestrator.toml"
 test ! -e "$TARGET_DIR/skills/orchestrator-routing"
 if grep -q 'BEGIN CODEX-AGENTS MANAGED ENTRYPOINT' "$TARGET_DIR/AGENTS.md"; then
   exit 1

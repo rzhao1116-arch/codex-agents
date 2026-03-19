@@ -10,7 +10,7 @@ trap 'rm -rf "${TMP_HOME}"' EXIT
 HOME="${TMP_HOME}" "${REPO_ROOT}/bin/codex-agents" install >/dev/null
 HOME="${TMP_HOME}" "${REPO_ROOT}/bin/codex-agents" uninstall >/dev/null
 
-if [[ -f "${TMP_HOME}/.codex/agents/orchestrator.md" ]]; then
+if [[ -f "${TMP_HOME}/.codex/agents/orchestrator.toml" ]]; then
   echo "Expected orchestrator agent to be removed during uninstall"
   exit 1
 fi
@@ -26,4 +26,3 @@ if grep -q "BEGIN CODEX-AGENTS MANAGED ENTRYPOINT" "${TMP_HOME}/.codex/AGENTS.md
 fi
 
 echo "Uninstall removed managed bundle successfully."
-
