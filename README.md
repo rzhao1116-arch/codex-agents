@@ -2,7 +2,7 @@
 
 Codex-native `.toml` agents plus an installed `orchestrator-routing` skill that makes `orchestrator` the default routing lens for non-trivial work.
 
-This repository is released under the MIT license. The current source-tree release target is `v0.1.2`.
+This repository is released under the MIT license. The latest published tag is `v0.1.2`.
 
 中文说明见 [README.zh-CN.md](README.zh-CN.md)。
 

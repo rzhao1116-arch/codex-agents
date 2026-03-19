@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FORMULA_FILE="$ROOT_DIR/Formula/codex-agents.rb"
-TARBALL_URL="https://github.com/rzhao1116-arch/codex-agents/archive/refs/tags/v0.1.0.tar.gz"
+TARBALL_URL="https://github.com/rzhao1116-arch/codex-agents/archive/refs/tags/v0.1.2.tar.gz"
 TMP_TARBALL="$(mktemp)"
 
 cleanup() {
@@ -13,7 +13,7 @@ cleanup() {
 trap cleanup EXIT
 
 grep -q 'class CodexAgents < Formula' "$FORMULA_FILE"
-grep -q 'url "https://github.com/rzhao1116-arch/codex-agents/archive/refs/tags/v0.1.0.tar.gz"' "$FORMULA_FILE"
+grep -q 'url "https://github.com/rzhao1116-arch/codex-agents/archive/refs/tags/v0.1.2.tar.gz"' "$FORMULA_FILE"
 grep -q 'license "MIT"' "$FORMULA_FILE"
 grep -q 'depends_on "python@3.13"' "$FORMULA_FILE"
 grep -q 'bin.write_exec_script libexec/"bin/codex-agents"' "$FORMULA_FILE"
