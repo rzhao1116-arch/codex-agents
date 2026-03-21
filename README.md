@@ -2,7 +2,7 @@
 
 Codex-native `.toml` agents plus an installed `orchestrator-routing` skill that makes `orchestrator` the default routing lens for non-trivial work.
 
-This repository is released under the MIT license. The latest published tag is `v0.1.2`.
+This repository is released under the MIT license. The latest published tag is `v0.1.3`.
 
 中文说明见 [README.zh-CN.md](README.zh-CN.md)。
 
@@ -252,6 +252,7 @@ Published release notes:
 - [v0.1.0](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.0.md)
 - [v0.1.1](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.1.md)
 - [v0.1.2](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.2.md)
+- [v0.1.3](/Users/ryan/Projects/Ai/other/codex-agents/docs/releases/v0.1.3.md)
 
 ## Homebrew Draft
 
